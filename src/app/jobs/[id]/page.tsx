@@ -79,6 +79,42 @@ export default function JobDetailPage() {
     setJob(updatedJobData)
     setEditModalOpen(false)
   }
+  
+  const handleDeleteJob = async () => {
+    if (!job) return;
+
+    if (window.confirm(`Are you sure you want to delete Job #${job.id}? This will also delete associated invoices and cannot be undone.`)) {
+      setLoading(true);
+      setError(null);
+
+      // Because of foreign key constraints, we must delete dependent records first.
+      // 1. Delete from job_addons
+      const { error: addonError } = await supabase.from('job_addons').delete().eq('job_id', job.id);
+      if (addonError) {
+        setError(`Failed to delete job addons: ${addonError.message}`);
+        setLoading(false);
+        return;
+      }
+
+      // 2. Delete from invoices (assuming invoices are linked to jobs)
+      // If you don't have invoices linked, you can remove this part.
+      const { error: invoiceError } = await supabase.from('invoices').delete().eq('job_id', job.id);
+      if (invoiceError) {
+        setError(`Failed to delete associated invoices: ${invoiceError.message}`);
+        setLoading(false);
+        return;
+      }
+
+      // 3. Delete the job itself
+      const { error: jobError } = await supabase.from('jobs').delete().eq('id', job.id);
+      if (jobError) {
+        setError(`Failed to delete job: ${jobError.message}`);
+        setLoading(false);
+      } else {
+        router.push('/jobs');
+      }
+    }
+  };
 
   if (loading) {
     return <div className="text-center p-6 text-gray-400">Loading job details...</div>
@@ -120,7 +156,7 @@ export default function JobDetailPage() {
             ))}
           </select>
           <button onClick={() => setEditModalOpen(true)} className="px-4 py-2 text-sm font-semibold text-primary-700 bg-white border-2 border-primary-700 rounded-lg hover:bg-primary-50 transition-colors">Edit Job</button>
-          <button className="px-4 py-2 text-sm font-semibold text-white bg-red-600 border border-red-600 rounded-lg hover:bg-red-700">Delete Job</button>
+          <button onClick={handleDeleteJob} className="px-4 py-2 text-sm font-semibold text-white bg-red-600 border border-red-600 rounded-lg hover:bg-red-700">Delete Job</button>
         </div>
       </div>
 
