@@ -33,12 +33,12 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
     >
       <div
         ref={modalRef}
-        className="bg-gray-900 border border-gray-800 rounded-2xl shadow-lg w-full max-w-lg p-6 m-4"
+        className="bg-white border border-gray-200 rounded-2xl shadow-lg w-full max-w-lg p-6 m-4"
         onClick={(e) => e.stopPropagation()} // Prevent click inside modal from closing it
       >
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-100">{title}</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+          <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-800 text-2xl leading-none">&times;</button>
         </div>
         <div>{children}</div>
       </div>

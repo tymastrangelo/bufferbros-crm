@@ -15,9 +15,9 @@ export default function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <div className="w-64 bg-gray-950 border-r border-gray-800 flex flex-col">
-      <div className="h-16 flex items-center justify-center border-b border-gray-800">
-        <h1 className="text-2xl font-bold text-gray-100">Buffer Bros</h1>
+    <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
+      <div className="h-16 flex items-center justify-center border-b border-gray-200">
+        <h1 className="text-2xl font-bold text-gray-800">Buffer Bros</h1>
       </div>
       <nav className="flex-1 px-4 py-6 space-y-2">
         {links.map((link) => (
@@ -25,7 +25,7 @@ export default function Sidebar() {
             key={link.name}
             href={link.href}
             className={`flex items-center px-4 py-2 rounded-lg transition-colors duration-200 ${
-              pathname.startsWith(link.href) ? 'bg-primary-800 text-white font-semibold' : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+              pathname.startsWith(link.href) ? 'bg-primary-100 text-primary-700 font-semibold' : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
             {link.name}

@@ -80,12 +80,12 @@ export default function DashboardPage() {
     <div className="space-y-8">
       {/* Header and Quick Actions */}
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-3xl font-bold text-gray-100">Dashboard</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
         <div className="flex gap-4">
           <Link href="/jobs/new" className="px-4 py-2 font-semibold text-white bg-primary-700 rounded-lg shadow-sm hover:bg-primary-800">
             + New Job
           </Link>
-          <Link href="/clients/new" className="px-4 py-2 font-semibold text-gray-100 bg-gray-700 rounded-lg shadow-sm hover:bg-gray-600">
+          <Link href="/clients/new" className="px-4 py-2 font-semibold text-white bg-primary-700 rounded-lg shadow-sm hover:bg-primary-800">
             + New Client
           </Link>
         </div>
@@ -93,12 +93,12 @@ export default function DashboardPage() {
 
       {/* Status Counts */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-200 mb-4">Job Status Overview</h2>
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">Job Status Overview</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4">
           {statusOrder.map(status => (
-            <div key={status} className="bg-gray-900 border border-gray-800 p-4 rounded-xl text-center">
-              <p className="text-3xl font-bold text-gray-100">{statusCounts[status] || 0}</p>
-              <p className="text-sm font-medium text-gray-400 capitalize">{status.replace('_', ' ')}</p>
+            <div key={status} className="bg-white border border-gray-200 p-4 rounded-xl text-center">
+              <p className="text-3xl font-bold text-gray-900">{statusCounts[status] || 0}</p>
+              <p className="text-sm font-medium text-gray-500 capitalize">{status.replace('_', ' ')}</p>
             </div>
           ))}
         </div>
@@ -106,24 +106,24 @@ export default function DashboardPage() {
 
       {/* Today's Jobs */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-200 mb-4">Today's Jobs</h2>
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl shadow-sm">
-          <ul className="divide-y divide-gray-700">
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">Today's Jobs</h2>
+        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm">
+          <ul className="divide-y divide-gray-200">
             {todaysJobs.length > 0 ? (
               todaysJobs.map(job => (
-                <li key={job.id} className="p-4 hover:bg-gray-800 transition-colors">
+                <li key={job.id} className="p-4 hover:bg-gray-50 transition-colors">
                   <Link href={`/jobs/${job.id}`} className="flex flex-wrap items-center justify-between gap-4">
                     <div>
-                      <p className="font-semibold text-gray-100">{job.clients?.full_name}</p>
-                      <p className="text-sm text-gray-400">
+                      <p className="font-semibold text-gray-900">{job.clients?.full_name}</p>
+                      <p className="text-sm text-gray-500">
                         {job.vehicles ? `${job.vehicles.make} ${job.vehicles.model}` : 'No vehicle'}
                       </p>
                     </div>
                     <div className="flex items-center gap-4 text-right">
-                      <p className="text-sm font-medium text-gray-300">
+                      <p className="text-sm font-medium text-gray-600">
                         {job.scheduled_date ? new Date(job.scheduled_date).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : 'Time TBD'}
                       </p>
-                      <span className="px-2 py-1 text-xs font-semibold rounded-full bg-gray-700 text-gray-200 capitalize">
+                      <span className="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800 capitalize">
                         {job.status}
                       </span>
                     </div>
@@ -131,7 +131,7 @@ export default function DashboardPage() {
                 </li>
               ))
             ) : (
-              <li className="p-6 text-center text-gray-400">
+              <li className="p-6 text-center text-gray-500">
                 No jobs scheduled for today.
               </li>
             )}

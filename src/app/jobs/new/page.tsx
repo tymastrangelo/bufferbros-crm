@@ -145,25 +145,25 @@ export default function NewJobPage() {
   return (
     <div className="max-w-4xl mx-auto p-4 md:p-6">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-100">Create New Job</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Create New Job</h1>
         <Link href="/jobs" className="text-sm font-medium text-primary-700 hover:text-primary-800 hover:underline">
           &larr; Back to Jobs List
         </Link>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-gray-900 border border-gray-800 p-8 rounded-2xl shadow-sm space-y-6">
+      <form onSubmit={handleSubmit} className="bg-white border border-gray-200 p-8 rounded-2xl shadow-sm space-y-6">
         {/* Client and Vehicle Selection */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label htmlFor="client" className="block text-sm font-medium text-gray-300">Client <span className="text-red-500">*</span></label>
-            <select id="client" value={selectedClientId} onChange={(e) => setSelectedClientId(e.target.value)} required className="mt-1 block w-full rounded-lg border-gray-600 bg-gray-800 px-4 py-3 text-gray-200 shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500">
+            <label htmlFor="client" className="block text-sm font-medium text-gray-700">Client <span className="text-red-500">*</span></label>
+            <select id="client" value={selectedClientId} onChange={(e) => setSelectedClientId(e.target.value)} required className="mt-1 block w-full rounded-lg border-gray-300 bg-white px-4 py-3 text-gray-900 shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500">
               <option value="" disabled>Select a client</option>
               {clients.map(c => <option key={c.id} value={c.id}>{c.full_name}</option>)}
             </select>
           </div>
           <div>
-            <label htmlFor="vehicle" className="block text-sm font-medium text-gray-300">Vehicle</label>
-            <select id="vehicle" value={selectedVehicleId} onChange={(e) => setSelectedVehicleId(e.target.value)} disabled={!selectedClientId || vehicles.length === 0} className="mt-1 block w-full rounded-lg border-gray-600 bg-gray-800 px-4 py-3 text-gray-200 shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500 disabled:opacity-50">
+            <label htmlFor="vehicle" className="block text-sm font-medium text-gray-700">Vehicle</label>
+            <select id="vehicle" value={selectedVehicleId} onChange={(e) => setSelectedVehicleId(e.target.value)} disabled={!selectedClientId || vehicles.length === 0} className="mt-1 block w-full rounded-lg border-gray-300 bg-white px-4 py-3 text-gray-900 shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500 disabled:opacity-50">
               <option value="">Select a vehicle (optional)</option>
               {vehicles.map(v => <option key={v.id} value={v.id}>{v.year} {v.make} {v.model}</option>)}
             </select>
@@ -172,20 +172,20 @@ export default function NewJobPage() {
 
         {/* Service and Addons */}
         <div>
-          <label htmlFor="service" className="block text-sm font-medium text-gray-300">Service <span className="text-red-500">*</span></label>
-          <select id="service" value={selectedServiceId} onChange={(e) => setSelectedServiceId(e.target.value)} required className="mt-1 block w-full rounded-lg border-gray-600 bg-gray-800 px-4 py-3 text-gray-200 shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500">
+          <label htmlFor="service" className="block text-sm font-medium text-gray-700">Service <span className="text-red-500">*</span></label>
+          <select id="service" value={selectedServiceId} onChange={(e) => setSelectedServiceId(e.target.value)} required className="mt-1 block w-full rounded-lg border-gray-300 bg-white px-4 py-3 text-gray-900 shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500">
             <option value="" disabled>Select a service</option>
             {services.map(s => <option key={s.id} value={s.id}>{s.name} - ${s.base_price}</option>)}
           </select>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-300">Add-ons</label>
-          <div className="mt-2 grid grid-cols-2 md:grid-cols-3 gap-4 p-4 bg-gray-800 border border-gray-700 rounded-lg">
+          <label className="block text-sm font-medium text-gray-700">Add-ons</label>
+          <div className="mt-2 grid grid-cols-2 md:grid-cols-3 gap-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
             {addons.map(addon => (
               <label key={addon.id} className="flex items-center space-x-3 cursor-pointer">
-                <input type="checkbox" checked={selectedAddonIds.has(addon.id)} onChange={() => handleAddonToggle(addon.id)} className="h-5 w-5 rounded border-gray-500 bg-gray-700 text-primary-600 focus:ring-primary-500" />
-                <span className="text-gray-200">{addon.name} (+${addon.price})</span>
+                <input type="checkbox" checked={selectedAddonIds.has(addon.id)} onChange={() => handleAddonToggle(addon.id)} className="h-5 w-5 rounded border-gray-300 bg-white text-primary-600 focus:ring-primary-500" />
+                <span className="text-gray-700">{addon.name} (+${addon.price})</span>
               </label>
             ))}
           </div>
@@ -193,24 +193,24 @@ export default function NewJobPage() {
 
         {/* Scheduling and Notes */}
         <div>
-          <label htmlFor="scheduledDate" className="block text-sm font-medium text-gray-300">Scheduled Date & Time</label>
-          <input id="scheduledDate" type="datetime-local" value={scheduledDate} onChange={(e) => setScheduledDate(e.target.value)} className="mt-1 block w-full rounded-lg border-gray-600 bg-gray-800 px-4 py-3 text-gray-200 shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500" />
+          <label htmlFor="scheduledDate" className="block text-sm font-medium text-gray-700">Scheduled Date & Time</label>
+          <input id="scheduledDate" type="datetime-local" value={scheduledDate} onChange={(e) => setScheduledDate(e.target.value)} className="mt-1 block w-full rounded-lg border-gray-300 bg-white px-4 py-3 text-gray-900 shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500" />
         </div>
 
         <div>
-          <label htmlFor="notes" className="block text-sm font-medium text-gray-300">Job Notes</label>
-          <textarea id="notes" rows={4} value={notes} onChange={(e) => setNotes(e.target.value)} className="mt-1 block w-full rounded-lg border-gray-600 bg-gray-800 px-4 py-3 text-gray-200 shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500" />
+          <label htmlFor="notes" className="block text-sm font-medium text-gray-700">Job Notes</label>
+          <textarea id="notes" rows={4} value={notes} onChange={(e) => setNotes(e.target.value)} className="mt-1 block w-full rounded-lg border-gray-300 bg-white px-4 py-3 text-gray-900 shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500" />
         </div>
 
         {/* Total and Submission */}
-        <div className="border-t border-gray-700 pt-6 space-y-4">
+        <div className="border-t border-gray-200 pt-6 space-y-4">
           <div className="flex justify-between items-center text-lg">
-            <span className="font-semibold text-gray-300">Estimated Total:</span>
-            <span className="font-bold text-gray-100">${totalPrice.toFixed(2)}</span>
+            <span className="font-semibold text-gray-600">Estimated Total:</span>
+            <span className="font-bold text-gray-900">${totalPrice.toFixed(2)}</span>
           </div>
           {error && <p className="text-sm text-red-500 text-center">{error}</p>}
           <div className="flex justify-end space-x-4">
-            <Link href="/jobs" className="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 rounded-lg hover:bg-gray-600">Cancel</Link>
+            <Link href="/jobs" className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">Cancel</Link>
             <button type="submit" disabled={submitting} className="px-6 py-2 text-sm font-bold text-white bg-primary-700 rounded-lg hover:bg-primary-800 disabled:bg-primary-400">
               {submitting ? 'Creating Job...' : 'Create Job'}
             </button>

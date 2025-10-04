@@ -93,12 +93,12 @@ export default function ClientDetailPage() {
           <Link href="/clients" className="text-sm font-medium text-primary-700 hover:text-primary-800 hover:underline mb-2 block">
             &larr; Back to Clients
           </Link>
-          <h1 className="text-3xl font-bold text-gray-100">{client.full_name}</h1>
-          <p className="text-gray-400">{client.email} &bull; {client.phone}</p>
+          <h1 className="text-3xl font-bold text-gray-900">{client.full_name}</h1>
+          <p className="text-gray-500">{client.email} &bull; {client.phone}</p>
         </div>
         <div className="flex gap-2">
-          <button className="px-4 py-2 text-sm font-semibold text-gray-200 bg-gray-700 rounded-lg hover:bg-gray-600">Edit Client</button>
-          <button onClick={handleDeleteClient} className="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700">Delete Client</button>
+          <button className="px-4 py-2 text-sm font-semibold text-primary-700 bg-white border-2 border-primary-700 rounded-lg hover:bg-primary-50 transition-colors">Edit Client</button>
+          <button onClick={handleDeleteClient} className="px-4 py-2 text-sm font-semibold text-white bg-red-600 border border-red-600 rounded-lg hover:bg-red-700">Delete Client</button>
         </div>
       </div>
 
@@ -106,55 +106,55 @@ export default function ClientDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column: Details */}
         <div className="lg:col-span-1 space-y-6">
-          <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl">
-            <h3 className="text-lg font-semibold text-gray-200 mb-4">Client Details</h3>
+          <div className="bg-white border border-gray-200 p-6 rounded-2xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Client Details</h3>
             <dl className="space-y-2 text-sm">
-              <div className="flex justify-between"><dt className="text-gray-400">Address</dt><dd className="text-gray-200 text-right">{client.address || 'N/A'}</dd></div>
-              <div className="flex justify-between"><dt className="text-gray-400">Contact Method</dt><dd className="text-gray-200 text-right">{client.preferred_contact_method || 'N/A'}</dd></div>
+              <div className="flex justify-between"><dt className="text-gray-500">Address</dt><dd className="text-gray-700 text-right">{client.address || 'N/A'}</dd></div>
+              <div className="flex justify-between"><dt className="text-gray-500">Contact Method</dt><dd className="text-gray-700 text-right">{client.preferred_contact_method || 'N/A'}</dd></div>
             </dl>
           </div>
-          <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl">
-            <h3 className="text-lg font-semibold text-gray-200 mb-4">Notes</h3>
-            <p className="text-sm text-gray-300 whitespace-pre-wrap">{client.notes || 'No notes for this client.'}</p>
+          <div className="bg-white border border-gray-200 p-6 rounded-2xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Notes</h3>
+            <p className="text-sm text-gray-600 whitespace-pre-wrap">{client.notes || 'No notes for this client.'}</p>
           </div>
         </div>
 
         {/* Right Column: Vehicles and Jobs */}
         <div className="lg:col-span-2 space-y-6">
           {/* Vehicles Card */}
-          <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl">
+          <div className="bg-white border border-gray-200 p-6 rounded-2xl">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-200">Vehicles</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Vehicles</h3>
               <button onClick={() => setAddVehicleModalOpen(true)} className="px-3 py-1 text-sm font-semibold text-white bg-primary-700 rounded-lg hover:bg-primary-800">Add Vehicle</button>
             </div>
-            <ul className="divide-y divide-gray-700">
+            <ul className="divide-y divide-gray-200">
               {vehicles.length > 0 ? vehicles.map(v => (
                 <li key={v.id} className="py-3">
-                  <p className="font-medium text-gray-200">{v.year} {v.make} {v.model}</p>
-                  <p className="text-sm text-gray-400">{v.color} &bull; {v.license_plate || 'No Plate'}</p>
+                  <p className="font-medium text-gray-800">{v.year} {v.make} {v.model}</p>
+                  <p className="text-sm text-gray-500">{v.color} &bull; {v.license_plate || 'No Plate'}</p>
                 </li>
-              )) : <p className="text-sm text-gray-400">No vehicles on file.</p>}
+              )) : <p className="text-sm text-gray-500">No vehicles on file.</p>}
             </ul>
           </div>
 
           {/* Jobs Card */}
-          <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl">
+          <div className="bg-white border border-gray-200 p-6 rounded-2xl">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-200">Job History</h3>
-              <button className="px-3 py-1 text-sm font-semibold text-white bg-primary-700 rounded-lg hover:bg-primary-800">Create Job</button>
+              <h3 className="text-lg font-semibold text-gray-900">Job History</h3>
+              <button className="px-4 py-2 text-sm font-semibold text-white bg-primary-700 rounded-lg hover:bg-primary-800">Create Job</button>
             </div>
-            <ul className="divide-y divide-gray-700">
+            <ul className="divide-y divide-gray-200">
               {jobs.length > 0 ? jobs.map(j => (
                 <li key={j.id} className="py-3 flex justify-between items-center">
                   <div>
-                    <p className="font-medium text-gray-200">Job #{j.id}</p>
-                    <p className="text-sm text-gray-400">
+                    <p className="font-medium text-gray-800">Job #{j.id}</p>
+                    <p className="text-sm text-gray-500">
                       {j.scheduled_date ? new Date(j.scheduled_date).toLocaleDateString() : 'Not Scheduled'}
                     </p>
                   </div>
-                  <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-700 text-gray-200 capitalize">{j.status}</span>
+                  <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 capitalize">{j.status}</span>
                 </li>
-              )) : <p className="text-sm text-gray-400">No job history.</p>}
+              )) : <p className="text-sm text-gray-500">No job history.</p>}
             </ul>
           </div>
         </div>
