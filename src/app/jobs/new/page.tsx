@@ -151,7 +151,7 @@ export default function NewJobPage() {
         </Link>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white border border-gray-200 p-8 rounded-2xl shadow-sm space-y-6">
+      <form onSubmit={handleSubmit} className="bg-white border border-gray-200 p-6 sm:p-8 rounded-2xl shadow-sm space-y-6">
         {/* Client and Vehicle Selection */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>

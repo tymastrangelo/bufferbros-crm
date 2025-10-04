@@ -137,13 +137,13 @@ export default function QuoteDetailPage() {
   }
 
   return (
-    <div>
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+    <div className="p-4 md:p-6">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <Link href="/dashboard" className="text-sm font-medium text-primary-700 hover:text-primary-800 hover:underline mb-2 block">
             &larr; Back to Dashboard
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900">Quote Submission #{quote.id}</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Quote Submission #{quote.id}</h1>
           <p className="text-gray-500">from {quote.full_name}</p>
         </div>
         <span className={`px-3 py-1 text-sm font-semibold rounded-full capitalize ${quote.client_id ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}`}>
@@ -151,7 +151,7 @@ export default function QuoteDetailPage() {
         </span>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
         {/* Left Column: Quote Details */}
         <div className="lg:col-span-2 bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Submission Details</h3>

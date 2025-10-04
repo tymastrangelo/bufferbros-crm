@@ -134,18 +134,18 @@ export default function JobDetailPage() {
   const calculatedTotal = servicePrice + addonsPrice
 
   return (
-    <div>
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+    <div className="p-4 md:p-6">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <Link href="/jobs" className="text-sm font-medium text-primary-700 hover:text-primary-800 hover:underline mb-2 block">
             &larr; Back to Jobs
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900">Job #{job.id}</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Job #{job.id}</h1>
           <p className="text-gray-500">
             {job.scheduled_date ? new Date(job.scheduled_date).toLocaleString() : 'Not Scheduled'}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <select
             value={job.status}
             onChange={(e) => handleStatusChange(e.target.value as JobStatus)}
@@ -160,7 +160,7 @@ export default function JobDetailPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
         {/* Left Column: Core Details */}
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white border border-gray-200 p-6 rounded-2xl">

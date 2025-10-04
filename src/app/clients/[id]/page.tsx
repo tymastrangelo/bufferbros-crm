@@ -93,24 +93,24 @@ export default function ClientDetailPage() {
   }
 
   return (
-    <div>
+    <div className="p-4 md:p-6">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <Link href="/clients" className="text-sm font-medium text-primary-700 hover:text-primary-800 hover:underline mb-2 block">
             &larr; Back to Clients
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900">{client.full_name}</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{client.full_name}</h1>
           <p className="text-gray-500">{client.email} &bull; {client.phone}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <button onClick={() => setEditModalOpen(true)} className="px-4 py-2 text-sm font-semibold text-primary-700 bg-white border-2 border-primary-700 rounded-lg hover:bg-primary-50 transition-colors">Edit Client</button>
           <button onClick={handleDeleteClient} className="px-4 py-2 text-sm font-semibold text-white bg-red-600 border border-red-600 rounded-lg hover:bg-red-700">Delete Client</button>
         </div>
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
         {/* Left Column: Details */}
         <div className="lg:col-span-1 space-y-6">
           <div className="bg-white border border-gray-200 p-6 rounded-2xl">

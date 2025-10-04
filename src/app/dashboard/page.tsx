@@ -89,14 +89,14 @@ function Dashboard() {
   }
 
   return (
-    <div>
+    <div className="p-4 md:p-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Dashboard</h1>
         <p className="text-gray-500">Your business at a glance.</p>
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
         <div className="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
           <h3 className="text-sm font-medium text-gray-500">New Quotes</h3>
           <p className="mt-1 text-3xl font-semibold text-gray-900">{stats.newQuotes}</p>
@@ -109,7 +109,7 @@ function Dashboard() {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
         {/* Recent Quotes Column */}
         <div className="lg:col-span-2 bg-white border border-gray-200 rounded-2xl shadow-sm">
           <div className="p-6 flex justify-between items-center">
@@ -122,7 +122,7 @@ function Dashboard() {
             ) : (
               <ul className="divide-y divide-gray-200">
                 {quotes.map((quote) => (
-                  <li key={quote.id} className="p-4 hover:bg-gray-50 flex items-center justify-between">
+                  <li key={quote.id} className="p-4 hover:bg-gray-50 flex flex-wrap items-center justify-between gap-2">
                     <div>
                       <p className="text-sm font-medium text-gray-900">{quote.full_name}</p>
                       <p className="text-sm text-gray-500">{new Date(quote.created_at).toLocaleDateString()}</p>
