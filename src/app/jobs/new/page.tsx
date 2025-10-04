@@ -1,8 +1,8 @@
 // src/app/jobs/new/page.tsx
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, useMemo, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabaseClient'
 import { type Client, type Vehicle, type Service, type Addon } from '@/lib/types'
@@ -80,6 +80,22 @@ export default function NewJobPage() {
     setSelectedAddonIds(newSelection)
   }
 
+  const triggerWebhook = async (jobData: any) => {
+    try {
+      // Call our internal API route instead of the external webhook directly
+      await fetch('/api/jobs/notify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(jobData),
+      });
+    } catch (error) {
+      // The API route will handle its own errors. We can log this for client-side debugging if needed.
+      console.error('Failed to trigger webhook:', error);
+    }
+  };
+
   const totalPrice = useMemo(() => {
     const servicePrice = services.find(s => s.id === parseInt(selectedServiceId))?.base_price || 0
     const addonsPrice = addons
@@ -134,6 +150,20 @@ export default function NewJobPage() {
         return
       }
     }
+
+    // 3. Trigger the webhook with all job details
+    const client = clients.find(c => c.id === newJob.client_id);
+    const vehicle = vehicles.find(v => v.id === newJob.vehicle_id);
+    const service = services.find(s => s.id === newJob.service_id);
+    const selectedAddons = addons.filter(a => selectedAddonIds.has(a.id));
+
+    await triggerWebhook({
+      job: newJob,
+      client,
+      vehicle,
+      service,
+      addons: selectedAddons,
+    });
 
     router.push(`/jobs/${newJob.id}`)
   }
