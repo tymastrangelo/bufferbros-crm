@@ -8,6 +8,7 @@ import { supabase } from '@/lib/supabaseClient'
 import { type Client, type Vehicle, type Job } from '@/lib/types'
 import Modal from '@/components/Modal'
 import AddVehicleForm from '@/components/AddVehicleForm'
+import EditClientForm from '@/components/EditClientForm'
 
 export default function ClientDetailPage() {
   const router = useRouter()
@@ -20,6 +21,7 @@ export default function ClientDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isAddVehicleModalOpen, setAddVehicleModalOpen] = useState(false)
+  const [isEditModalOpen, setEditModalOpen] = useState(false)
 
   const fetchData = useCallback(async () => {
     if (!clientId) return
@@ -73,6 +75,11 @@ export default function ClientDetailPage() {
     setAddVehicleModalOpen(false)
   }
 
+  const handleClientUpdated = (updatedClient: Client) => {
+    setClient(updatedClient)
+    setEditModalOpen(false)
+  }
+
   if (loading) {
     return <div className="text-center p-6 text-gray-400">Loading client details...</div>
   }
@@ -97,7 +104,7 @@ export default function ClientDetailPage() {
           <p className="text-gray-500">{client.email} &bull; {client.phone}</p>
         </div>
         <div className="flex gap-2">
-          <button className="px-4 py-2 text-sm font-semibold text-primary-700 bg-white border-2 border-primary-700 rounded-lg hover:bg-primary-50 transition-colors">Edit Client</button>
+          <button onClick={() => setEditModalOpen(true)} className="px-4 py-2 text-sm font-semibold text-primary-700 bg-white border-2 border-primary-700 rounded-lg hover:bg-primary-50 transition-colors">Edit Client</button>
           <button onClick={handleDeleteClient} className="px-4 py-2 text-sm font-semibold text-white bg-red-600 border border-red-600 rounded-lg hover:bg-red-700">Delete Client</button>
         </div>
       </div>
@@ -167,6 +174,15 @@ export default function ClientDetailPage() {
         title={`Add Vehicle for ${client.full_name}`}
       >
         <AddVehicleForm clientId={client.id} onSuccess={handleVehicleAdded} onCancel={() => setAddVehicleModalOpen(false)} />
+      </Modal>
+
+      {/* Edit Client Modal */}
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        title={`Edit ${client.full_name}`}
+      >
+        <EditClientForm client={client} onSuccess={handleClientUpdated} onCancel={() => setEditModalOpen(false)} />
       </Modal>
     </div>
   )
