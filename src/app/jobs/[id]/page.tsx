@@ -96,8 +96,8 @@ export default function JobDetailPage() {
           <Link href="/jobs" className="text-sm font-medium text-primary-700 hover:text-primary-800 hover:underline mb-2 block">
             &larr; Back to Jobs
           </Link>
-          <h1 className="text-3xl font-bold text-gray-100">Job #{job.id}</h1>
-          <p className="text-gray-400">
+          <h1 className="text-3xl font-bold text-gray-900">Job #{job.id}</h1>
+          <p className="text-gray-500">
             {job.scheduled_date ? new Date(job.scheduled_date).toLocaleString() : 'Not Scheduled'}
           </p>
         </div>
@@ -105,64 +105,64 @@ export default function JobDetailPage() {
           <select
             value={job.status}
             onChange={(e) => handleStatusChange(e.target.value as JobStatus)}
-            className="rounded-lg border-gray-600 bg-gray-800 px-4 py-2 text-gray-200 shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+            className="rounded-lg border-gray-300 bg-white px-4 py-2 text-gray-900 shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
           >
             {jobStatuses.map(status => (
               <option key={status} value={status} className="capitalize">{status.replace('_', ' ')}</option>
             ))}
           </select>
-          <button className="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700">Delete Job</button>
+          <button className="px-4 py-2 text-sm font-semibold text-white bg-red-600 border border-red-600 rounded-lg hover:bg-red-700">Delete Job</button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column: Core Details */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl">
-            <h3 className="text-lg font-semibold text-gray-200 mb-4">Service & Add-ons</h3>
+          <div className="bg-white border border-gray-200 p-6 rounded-2xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Service & Add-ons</h3>
             <div className="space-y-3">
-              <div className="flex justify-between text-gray-200">
+              <div className="flex justify-between text-gray-800 font-medium">
                 <span>{job.services?.name ?? 'Service not specified'}</span>
                 <span>${servicePrice.toFixed(2)}</span>
               </div>
               {addons.map(addon => addon && (
-                <div key={addon.id} className="flex justify-between text-gray-400 pl-4">
+                <div key={addon.id} className="flex justify-between text-gray-500 pl-4">
                   <span>+ {addon.name}</span>
                   <span>${addon.price.toFixed(2)}</span>
                 </div>
               ))}
             </div>
-            <div className="border-t border-gray-700 mt-4 pt-4 flex justify-between text-lg font-bold text-white">
+            <div className="border-t border-gray-200 mt-4 pt-4 flex justify-between text-lg font-bold text-gray-900">
               <span>Estimated Total</span>
               <span>${(job.total_price ?? calculatedTotal).toFixed(2)}</span>
             </div>
           </div>
-          <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl">
-            <h3 className="text-lg font-semibold text-gray-200 mb-4">Job Notes</h3>
-            <p className="text-sm text-gray-300 whitespace-pre-wrap">{job.notes || 'No notes for this job.'}</p>
+          <div className="bg-white border border-gray-200 p-6 rounded-2xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Job Notes</h3>
+            <p className="text-sm text-gray-600 whitespace-pre-wrap">{job.notes || 'No notes for this job.'}</p>
           </div>
         </div>
 
         {/* Right Column: Associated Info */}
         <div className="lg:col-span-1 space-y-6">
-          <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl">
-            <h3 className="text-lg font-semibold text-gray-200 mb-4">Client</h3>
+          <div className="bg-white border border-gray-200 p-6 rounded-2xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Client</h3>
             {job.clients ? (
-              <Link href={`/clients/${job.clients.id}`} className="hover:text-primary-600">
-                <p className="font-medium text-gray-100">{job.clients.full_name}</p>
-                <p className="text-sm text-gray-400">{job.clients.email}</p>
-                <p className="text-sm text-gray-400">{job.clients.phone}</p>
+              <Link href={`/clients/${job.clients.id}`} className="group">
+                <p className="font-medium text-gray-800 group-hover:text-primary-700 group-hover:underline">{job.clients.full_name}</p>
+                <p className="text-sm text-gray-500">{job.clients.email}</p>
+                <p className="text-sm text-gray-500">{job.clients.phone}</p>
               </Link>
-            ) : <p className="text-sm text-gray-400">No client associated.</p>}
+            ) : <p className="text-sm text-gray-500">No client associated.</p>}
           </div>
-          <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl">
-            <h3 className="text-lg font-semibold text-gray-200 mb-4">Vehicle</h3>
+          <div className="bg-white border border-gray-200 p-6 rounded-2xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Vehicle</h3>
             {job.vehicles ? (
-              <Link href={`/vehicles/${job.vehicles.id}`} className="hover:text-primary-600">
-                <p className="font-medium text-gray-100">{job.vehicles.year} {job.vehicles.make} {job.vehicles.model}</p>
-                <p className="text-sm text-gray-400">{job.vehicles.color} &bull; {job.vehicles.license_plate}</p>
+              <Link href={`/vehicles/${job.vehicles.id}`} className="group">
+                <p className="font-medium text-gray-800 group-hover:text-primary-700 group-hover:underline">{job.vehicles.year} {job.vehicles.make} {job.vehicles.model}</p>
+                <p className="text-sm text-gray-500">{job.vehicles.color} &bull; {job.vehicles.license_plate}</p>
               </Link>
-            ) : <p className="text-sm text-gray-400">No vehicle associated.</p>}
+            ) : <p className="text-sm text-gray-500">No vehicle associated.</p>}
           </div>
         </div>
       </div>
