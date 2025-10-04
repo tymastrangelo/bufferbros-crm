@@ -6,6 +6,8 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabaseClient'
 import { type Job, type Client, type Vehicle, type Service, type Addon, type JobStatus } from '@/lib/types'
+import Modal from '@/components/Modal'
+import EditJobForm from '@/components/EditJobForm'
 
 type JobWithAllDetails = Job & {
   clients: Client | null
@@ -24,6 +26,7 @@ export default function JobDetailPage() {
   const [job, setJob] = useState<JobWithAllDetails | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isEditModalOpen, setEditModalOpen] = useState(false)
 
   const fetchData = useCallback(async () => {
     if (!jobId) return
@@ -72,6 +75,11 @@ export default function JobDetailPage() {
     }
   }
 
+  const handleJobUpdated = (updatedJobData: JobWithAllDetails) => {
+    setJob(updatedJobData)
+    setEditModalOpen(false)
+  }
+
   if (loading) {
     return <div className="text-center p-6 text-gray-400">Loading job details...</div>
   }
@@ -101,7 +109,7 @@ export default function JobDetailPage() {
             {job.scheduled_date ? new Date(job.scheduled_date).toLocaleString() : 'Not Scheduled'}
           </p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
           <select
             value={job.status}
             onChange={(e) => handleStatusChange(e.target.value as JobStatus)}
@@ -111,6 +119,7 @@ export default function JobDetailPage() {
               <option key={status} value={status} className="capitalize">{status.replace('_', ' ')}</option>
             ))}
           </select>
+          <button onClick={() => setEditModalOpen(true)} className="px-4 py-2 text-sm font-semibold text-primary-700 bg-white border-2 border-primary-700 rounded-lg hover:bg-primary-50 transition-colors">Edit Job</button>
           <button className="px-4 py-2 text-sm font-semibold text-white bg-red-600 border border-red-600 rounded-lg hover:bg-red-700">Delete Job</button>
         </div>
       </div>
@@ -166,6 +175,13 @@ export default function JobDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Edit Job Modal */}
+      {job && (
+        <Modal isOpen={isEditModalOpen} onClose={() => setEditModalOpen(false)} title={`Edit Job #${job.id}`}>
+          <EditJobForm job={job} onSuccess={handleJobUpdated} onCancel={() => setEditModalOpen(false)} />
+        </Modal>
+      )}
     </div>
   )
 }
