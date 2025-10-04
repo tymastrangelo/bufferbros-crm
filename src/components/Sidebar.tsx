@@ -1,6 +1,7 @@
 // src/components/Sidebar.tsx
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
@@ -17,7 +18,14 @@ export default function Sidebar() {
   return (
     <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
       <div className="h-16 flex items-center justify-center border-b border-gray-200">
-        <h1 className="text-2xl font-bold text-gray-800">Buffer Bros</h1>
+        <Link href="/dashboard">
+          <Image
+            src="/logo.png" // Place your logo in the /public folder
+            alt="Buffer Bros Logo"
+            width={150} // Adjust to your logo's width
+            height={40}  // Adjust to your logo's height
+          />
+        </Link>
       </div>
       <nav className="flex-1 px-4 py-6 space-y-2">
         {links.map((link) => (
