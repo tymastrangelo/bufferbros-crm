@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabaseClient'
 import { Suspense } from 'react'
@@ -76,7 +76,7 @@ function Dashboard() {
     const { data: quotesData, error: quotesError } = quotesRes
     const { data: jobsData, error: jobsError } = jobsRes
     const { count: newQuotesCount, error: statsError } = statsRes
-    const { data: paidJobsData, count: paidJobsCount, error: paidJobsError } = paidJobsRes
+    const { data: paidJobsData, error: paidJobsError } = paidJobsRes
     const { data: expensesData, error: expensesError } = expensesRes
 
     if (quotesError || jobsError || statsError || paidJobsError || expensesError) {
@@ -139,7 +139,6 @@ function Dashboard() {
 
       // The type from Supabase can be an array for related tables, so we cast it.
       // We know from our schema it will be a single object.
-      const typedJobsData = jobsData as unknown as UpcomingJob[];
       setQuotes(quotesData || []);
       setUpcomingJobs(jobsData || [])
       setStats({
