@@ -58,6 +58,22 @@ export interface Job {
   notes?: string | null;
 }
 
+export interface Expense {
+  id: number;
+  created_at: string;
+  date: string;
+  description: string;
+  amount: number;
+  category?: string | null;
+}
+
+export interface FinancialStats {
+  runningBalance: number;
+  businessShare: number;
+  totalExpenses: number;
+  paidJobsCount: number;
+}
+
 // This is a "joined" type for displaying job information easily
 export interface JobWithDetails extends Job {
   clients: { full_name: string } | null;

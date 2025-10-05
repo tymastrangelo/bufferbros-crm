@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabaseClient'
 import { Suspense } from 'react'
+import { type FinancialStats } from '@/lib/types'
 
 interface UpcomingJob {
   id: number;
@@ -23,6 +24,12 @@ function Dashboard() {
   const [quotes, setQuotes] = useState<QuoteSubmission[]>([])
   const [upcomingJobs, setUpcomingJobs] = useState<UpcomingJob[]>([])
   const [stats, setStats] = useState({ newQuotes: 0, scheduledJobs: 0 })
+  const [financialStats, setFinancialStats] = useState<FinancialStats>({
+    runningBalance: 0,
+    businessShare: 0,
+    totalExpenses: 0,
+    paidJobsCount: 0,
+  })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -45,22 +52,48 @@ function Dashboard() {
 
     const today = new Date().toISOString()
 
-    const [quotesRes, jobsRes, statsRes] = await Promise.all([
+    const [quotesRes, jobsRes, statsRes, paidJobsRes, expensesRes] = await Promise.all([
       // Fetch recent quotes
       supabase.from('quote_submissions').select('id, created_at, full_name, status').order('created_at', { ascending: false }).limit(5),
       // Fetch upcoming jobs
       supabase.from('jobs').select('id, scheduled_date, clients(full_name)').eq('status', 'scheduled').gte('scheduled_date', today).order('scheduled_date', { ascending: true }).limit(5),
       // Fetch stats
-      supabase.from('quote_submissions').select('id', { count: 'exact', head: true }).eq('status', 'new')
+      supabase.from('quote_submissions').select('id', { count: 'exact', head: true }).eq('status', 'new'),
+      // Fetch all paid jobs for financial calculations
+      supabase.from('jobs').select('total_price', { count: 'exact' }).eq('status', 'paid'),
+      // Fetch all expenses
+      supabase.from('expenses').select('amount')
     ])
 
     const { data: quotesData, error: quotesError } = quotesRes
     const { data: jobsData, error: jobsError } = jobsRes
     const { count: newQuotesCount, error: statsError } = statsRes
+    const { data: paidJobsData, count: paidJobsCount, error: paidJobsError } = paidJobsRes
+    const { data: expensesData, error: expensesError } = expensesRes
 
-    if (quotesError || jobsError || statsError) {
-      setError(quotesError?.message || jobsError?.message || statsError?.message || 'An unknown error occurred')
+    if (quotesError || jobsError || statsError || paidJobsError || expensesError) {
+      setError(
+        quotesError?.message ||
+        jobsError?.message ||
+        statsError?.message ||
+        paidJobsError?.message ||
+        expensesError?.message ||
+        'An unknown error occurred'
+      )
     } else {
+      // --- Financial Calculations ---
+      const totalRevenue = paidJobsData?.reduce((acc, job) => acc + (job.total_price || 0), 0) || 0
+      const businessShare = totalRevenue * 0.60
+
+      const totalExpenses = expensesData?.reduce((acc, expense) => acc + (expense.amount || 0), 0) || 0
+
+      setFinancialStats({
+        runningBalance: businessShare - totalExpenses,
+        businessShare: businessShare,
+        totalExpenses: totalExpenses,
+        paidJobsCount: paidJobsCount || 0,
+      })
+
       // The type from Supabase can be an array for related tables, so we cast it.
       // We know from our schema it will be a single object.
       const typedJobsData = jobsData as unknown as UpcomingJob[];
@@ -96,14 +129,22 @@ function Dashboard() {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+        <div className="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
+          <h3 className="text-sm font-medium text-gray-500">Running Balance</h3>
+          <p className="mt-1 text-3xl font-semibold text-gray-900">${financialStats.runningBalance.toFixed(2)}</p>
+        </div>
+        <div className="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
+          <h3 className="text-sm font-medium text-gray-500">Business Share (60%)</h3>
+          <p className="mt-1 text-3xl font-semibold text-green-600">${financialStats.businessShare.toFixed(2)}</p>
+        </div>
+        <div className="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
+          <h3 className="text-sm font-medium text-gray-500">Total Expenses</h3>
+          <p className="mt-1 text-3xl font-semibold text-red-600">${financialStats.totalExpenses.toFixed(2)}</p>
+        </div>
         <div className="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
           <h3 className="text-sm font-medium text-gray-500">New Quotes</h3>
           <p className="mt-1 text-3xl font-semibold text-gray-900">{stats.newQuotes}</p>
-        </div>
-        <div className="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
-          <h3 className="text-sm font-medium text-gray-500">Upcoming Jobs</h3>
-          <p className="mt-1 text-3xl font-semibold text-gray-900">{stats.scheduledJobs}</p>
         </div>
         {/* Add more stat cards here as needed */}
       </div>

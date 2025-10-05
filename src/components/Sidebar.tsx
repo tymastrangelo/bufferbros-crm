@@ -10,6 +10,7 @@ const links = [
   { name: 'Jobs', href: '/jobs' },
   { name: 'Clients', href: '/clients' },
   { name: 'Vehicles', href: '/vehicles' },
+  { name: 'Expenses', href: '/expenses' },
 ]
 
 export default function Sidebar() {
