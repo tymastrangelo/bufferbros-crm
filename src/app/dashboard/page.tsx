@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabaseClient'
 import { Suspense } from 'react'
 import { type FinancialStats } from '@/lib/types'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 
 interface UpcomingJob {
   id: number;
@@ -19,6 +20,12 @@ interface QuoteSubmission {
   status: string;
 }
 
+interface ChartData {
+  name: string; // e.g., "Jan 24"
+  revenue: number;
+  expenses: number;
+}
+
 function Dashboard() {
   const router = useRouter()
   const [quotes, setQuotes] = useState<QuoteSubmission[]>([])
@@ -30,6 +37,7 @@ function Dashboard() {
     totalExpenses: 0,
     paidJobsCount: 0,
   })
+  const [chartData, setChartData] = useState<ChartData[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -59,10 +67,10 @@ function Dashboard() {
       supabase.from('jobs').select('id, scheduled_date, clients(full_name)').eq('status', 'scheduled').gte('scheduled_date', today).order('scheduled_date', { ascending: true }).limit(5),
       // Fetch stats
       supabase.from('quote_submissions').select('id', { count: 'exact', head: true }).eq('status', 'new'),
-      // Fetch all paid jobs for financial calculations
-      supabase.from('jobs').select('total_price', { count: 'exact' }).eq('status', 'paid'),
-      // Fetch all expenses
-      supabase.from('expenses').select('amount')
+      // Fetch all paid invoices for financial calculations (using transaction_date for time series)
+      supabase.from('invoices').select('amount, transaction_date').eq('status', 'paid'),
+      // Fetch all expenses with their dates
+      supabase.from('expenses').select('amount, date')
     ])
 
     const { data: quotesData, error: quotesError } = quotesRes
@@ -82,7 +90,7 @@ function Dashboard() {
       )
     } else {
       // --- Financial Calculations ---
-      const totalRevenue = paidJobsData?.reduce((acc, job) => acc + (job.total_price || 0), 0) || 0
+      const totalRevenue = paidJobsData?.reduce((acc, invoice) => acc + (invoice.amount || 0), 0) || 0
       const businessShare = totalRevenue * 0.60
 
       const totalExpenses = expensesData?.reduce((acc, expense) => acc + (expense.amount || 0), 0) || 0
@@ -91,8 +99,43 @@ function Dashboard() {
         runningBalance: businessShare - totalExpenses,
         businessShare: businessShare,
         totalExpenses: totalExpenses,
-        paidJobsCount: paidJobsCount || 0,
+        paidJobsCount: paidJobsData?.length || 0,
       })
+
+      // --- Chart Data Processing ---
+      const monthlyData: { [key: string]: { revenue: number; expenses: number } } = {}
+
+      // Process revenue from paid invoices
+      paidJobsData?.forEach(invoice => {
+        if (invoice.transaction_date) {
+          const date = new Date(invoice.transaction_date)
+          const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+          if (!monthlyData[monthKey]) monthlyData[monthKey] = { revenue: 0, expenses: 0 }
+          monthlyData[monthKey].revenue += (invoice.amount || 0) * 0.60
+        }
+      })
+
+      // Process expenses
+      expensesData?.forEach(expense => {
+        const date = new Date(expense.date)
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+        if (!monthlyData[monthKey]) monthlyData[monthKey] = { revenue: 0, expenses: 0 }
+        monthlyData[monthKey].expenses += expense.amount || 0
+      })
+
+      const formattedChartData = Object.keys(monthlyData)
+        .sort() // Sort keys chronologically (e.g., '2023-12', '2024-01')
+        .map(key => {
+          const [year, month] = key.split('-')
+          const monthName = new Date(parseInt(year), parseInt(month) - 1).toLocaleString('default', { month: 'short' })
+          return {
+            name: `${monthName} '${year.slice(2)}`,
+            revenue: monthlyData[key].revenue,
+            expenses: monthlyData[key].expenses,
+          }
+        })
+
+      setChartData(formattedChartData)
 
       // The type from Supabase can be an array for related tables, so we cast it.
       // We know from our schema it will be a single object.
@@ -213,6 +256,27 @@ function Dashboard() {
               </ul>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* Chart */}
+      <div className="mt-8 bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Monthly Performance</h3>
+        <div style={{ width: '100%', height: 300 }}>
+          <ResponsiveContainer>
+            <LineChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+              <XAxis dataKey="name" stroke="#6b7280" />
+              <YAxis stroke="#6b7280" />
+              <Tooltip
+                contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '0.5rem' }}
+                formatter={(value: number) => `$${value.toFixed(2)}`}
+              />
+              <Legend />
+              <Line type="monotone" dataKey="revenue" stroke="#16a34a" strokeWidth={2} name="Business Share" />
+              <Line type="monotone" dataKey="expenses" stroke="#dc2626" strokeWidth={2} name="Expenses" />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
       </div>
     </div>
