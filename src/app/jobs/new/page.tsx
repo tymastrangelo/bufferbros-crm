@@ -71,7 +71,9 @@ export default function NewJobPage() {
         .from('vehicles')
         .select('*')
         .eq('client_id', selectedClientId)
-      if (data) {
+      if (error) {
+        setError(`Failed to fetch vehicles: ${error.message}`)
+      } else if (data) {
         setVehicles(data)
       }
     }

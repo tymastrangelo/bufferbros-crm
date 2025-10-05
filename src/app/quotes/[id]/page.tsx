@@ -1,18 +1,23 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabaseClient'
 import { type Client } from '@/lib/types'
 
+interface QuoteVehicle {
+  year: string;
+  make: string;
+  model: string;
+}
 interface QuoteSubmission {
   id: number;
   created_at: string;
   full_name: string;
   phone: string | null;
   email: string | null;
-  vehicles: any; // JSONB from quote form
+  vehicles: QuoteVehicle[] | null; // JSONB from quote form
   preferred_package: string | null;
   add_ons: string[] | null;
   service_address: string | null;
@@ -24,7 +29,6 @@ interface QuoteSubmission {
 type QuoteWithClient = QuoteSubmission & { clients: Client | null }
 
 export default function QuoteDetailPage() {
-  const router = useRouter()
   const params = useParams()
   const quoteId = params.id
 
