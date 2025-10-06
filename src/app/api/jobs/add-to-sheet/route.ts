@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     const values = [
       [
         job.id,
-        job.scheduled_date ? new Date(job.scheduled_date).toLocaleString() : 'Not Scheduled',
+        job.scheduled_date ? new Date(job.scheduled_date).toISOString() : 'Not Scheduled',
         client?.full_name ?? 'N/A',
         client?.phone ?? 'N/A',
         client?.email ?? 'N/A',

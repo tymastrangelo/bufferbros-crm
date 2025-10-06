@@ -141,7 +141,7 @@ export default function NewJobPage() {
         client_id: parseInt(selectedClientId),
         vehicle_id: selectedVehicleId ? parseInt(selectedVehicleId) : null,
         service_id: selectedServiceId === 'custom-service' ? null : parseInt(selectedServiceId),
-        scheduled_date: scheduledDate || null,
+        scheduled_date: scheduledDate ? new Date(scheduledDate).toISOString() : null,
         notes,
         total_price: totalPrice,
         status: 'new',
