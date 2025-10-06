@@ -45,6 +45,7 @@ function Dashboard() {
     paidJobsCount: 0,
   })
   const [chartData, setChartData] = useState<ChartData[]>([])
+  const [chartTotals, setChartTotals] = useState({ revenue: 0, expenses: 0 })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -151,6 +152,13 @@ function Dashboard() {
           }
         })
 
+      const totalsForChart = formattedChartData.reduce((acc, month) => {
+        acc.revenue += month.revenue
+        acc.expenses += month.expenses
+        return acc
+      }, { revenue: 0, expenses: 0 })
+
+      setChartTotals(totalsForChart)
       setChartData(formattedChartData)
 
       // The type from Supabase can be an array for related tables, so we cast it.
@@ -305,7 +313,19 @@ function Dashboard() {
         </div>
         <div className="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
           {/* Chart */}
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Monthly Performance</h3>
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Monthly Performance</h3>
+              <div className="flex items-center gap-4 text-sm mt-2 sm:mt-0">
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-green-500"></span>
+                  <span className="text-gray-600">Total Share: <span className="font-bold text-gray-800">${chartTotals.revenue.toFixed(2)}</span></span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-red-600"></span>
+                  <span className="text-gray-600">Total Expenses: <span className="font-bold text-gray-800">${chartTotals.expenses.toFixed(2)}</span></span>
+                </div>
+              </div>
+            </div>
             <div style={{ width: '100%', height: 300 }}>
               <ResponsiveContainer>
                 <LineChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
