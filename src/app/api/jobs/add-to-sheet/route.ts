@@ -46,6 +46,8 @@ export async function POST(request: Request) {
         client?.full_name ?? 'N/A',
         client?.phone ?? 'N/A',
         client?.email ?? 'N/A',
+        client?.address ?? 'N/A', // Client's address/location
+        client?.notes ?? '',      // Client's notes
         vehicleInfo,
         serviceName,
         addonNames,
