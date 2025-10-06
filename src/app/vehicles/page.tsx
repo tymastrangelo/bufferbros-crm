@@ -43,37 +43,43 @@ export default function VehiclesPage() {
       const from = (currentPage - 1) * vehiclesPerPage
       const to = from + vehiclesPerPage - 1
 
-      let query;
-      let countQuery;
+      let data: VehicleWithClient[] | null = null;
+      let error: Error | null = null;
+      let count: number | null = 0;
 
       if (debouncedSearchTerm) {
-        // Use the RPC function for searching
-        query = supabase.rpc('search_vehicles', { search_term: debouncedSearchTerm })
+        // When searching, we need two separate queries: one for data (RPC) and one for the count.
+        const rpcQuery = supabase.rpc('search_vehicles', { search_term: debouncedSearchTerm })
           .select('*, clients!inner(full_name)')
-        // For count, we have to re-apply the logic in a way Supabase count understands
-        countQuery = supabase.from('vehicles').select('id', { count: 'exact', head: true })
+          .order(sortBy.split('-')[0] === 'client_name' ? 'full_name' : sortBy.split('-')[0], { 
+            referencedTable: sortBy.split('-')[0] === 'client_name' ? 'clients' : undefined,
+            ascending: sortBy.split('-')[1] === 'asc', 
+            nullsFirst: false 
+          })
+          .range(from, to);
+
+        const countQuery = supabase.from('vehicles').select('id', { count: 'exact', head: true })
           .or(`make.ilike.%${debouncedSearchTerm}%,model.ilike.%${debouncedSearchTerm}%,clients.full_name.ilike.%${debouncedSearchTerm}%`, { referencedTable: 'clients' })
+
+        const [dataRes, countRes] = await Promise.all([rpcQuery, countQuery]);
+        data = dataRes.data as VehicleWithClient[];
+        error = dataRes.error;
+        count = countRes.count;
       } else {
-        // Standard query when not searching
-        query = supabase.from('vehicles').select('*, clients!inner(full_name)', { count: 'exact' })
+        // Standard query when not searching, which returns data and count in one go.
+        const { data: queryData, error: queryError, count: queryCount } = await supabase
+          .from('vehicles')
+          .select('*, clients!inner(full_name)', { count: 'exact' })
+          .order(sortBy.split('-')[0] === 'client_name' ? 'full_name' : sortBy.split('-')[0], { referencedTable: sortBy.split('-')[0] === 'client_name' ? 'clients' : undefined, ascending: sortBy.split('-')[1] === 'asc', nullsFirst: false })
+          .range(from, to);
+        data = queryData;
+        error = queryError;
+        count = queryCount;
       }
-
-      const [sortField, sortOrder] = sortBy.split('-')
-      if (sortField === 'client_name') {
-        query = query.order('full_name', { referencedTable: 'clients', ascending: sortOrder === 'asc' })
-      } else {
-        query = query.order(sortField, { ascending: sortOrder === 'asc', nullsFirst: false })
-      }
-
-      query = query.range(from, to)
-
-      // Execute queries
-      const { data, error } = await query;
-      const { count } = countQuery ? await countQuery : { count: (data as any)?.length || 0 }; // A bit of a simplification for count with RPC
 
       if (error) throw error
 
-      setVehicles(data as VehicleWithClient[])
+      setVehicles(data || [])
       setTotalVehicles(count || 0)
     } catch (err: unknown) {
       if (err instanceof Error) {
