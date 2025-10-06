@@ -147,7 +147,10 @@ export default function ExpensesPage() {
                     <tbody className="bg-white divide-y divide-gray-200">
                       {expenses.map((expense) => (
                         <tr key={expense.id}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(expense.date).toLocaleDateString()}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {/* Add 'T00:00:00' to treat the date as local, preventing timezone shifts */}
+                            {new Date(expense.date + 'T00:00:00').toLocaleDateString()}
+                          </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{expense.description}</td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{expense.category || 'N/A'}</td>
                           <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-700">${expense.amount.toFixed(2)}</td>
