@@ -13,6 +13,7 @@ export default function JobsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [sortBy, setSortBy] = useState('scheduled_date-desc')
   const [currentPage, setCurrentPage] = useState(1)
@@ -20,6 +21,16 @@ export default function JobsPage() {
   const [totalJobs, setTotalJobs] = useState(0)
 
   const jobStatuses = ['new', 'quoted', 'scheduled', 'in_progress', 'completed', 'paid', 'cancelled']
+
+  // Debounce search term to avoid fetching on every keystroke
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm)
+    }, 500) // Wait 500ms after user stops typing
+
+    // Cleanup function to clear the timeout if the user types again
+    return () => clearTimeout(handler)
+  }, [searchTerm])
 
   const fetchJobs = useCallback(async () => {
     setLoading(true)
@@ -41,8 +52,8 @@ export default function JobsPage() {
         query = query.eq('status', statusFilter)
       }
 
-      if (searchTerm) {
-        query = query.ilike('clients.full_name', `%${searchTerm}%`)
+      if (debouncedSearchTerm) {
+        query = query.ilike('clients.full_name', `%${debouncedSearchTerm}%`)
       }
 
       const [sortField, sortOrder] = sortBy.split('-')
@@ -65,7 +76,7 @@ export default function JobsPage() {
     } finally {
       setLoading(false)
     }
-  }, [router, currentPage, jobsPerPage, statusFilter, searchTerm, sortBy])
+  }, [router, currentPage, jobsPerPage, statusFilter, debouncedSearchTerm, sortBy])
 
   useEffect(() => {
     fetchJobs()
@@ -74,7 +85,7 @@ export default function JobsPage() {
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1)
-  }, [statusFilter, searchTerm, jobsPerPage])
+  }, [statusFilter, debouncedSearchTerm, jobsPerPage])
 
   if (loading) {
     return <div className="text-center p-6 text-gray-400">Loading jobs...</div>
