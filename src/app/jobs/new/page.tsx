@@ -157,27 +157,27 @@ export default function NewJobPage() {
       const { error: addonError } = await supabase.from('job_addons').insert(jobAddons)
       if (addonError) {
         // Handle addon link error (e.g., log it, show a partial success message)
-        setError(`Job created, but failed to link addons: ${addonError.message}`)
-        setSubmitting(false)
-        // Still redirect, as the main job was created
-        router.push(`/jobs/${newJob.id}`)
-        return
+        // We'll set an error, but continue to the webhook and redirect.
+        // The main job was created, which is the most important part.
+        setError(`Job created, but failed to link addons: ${addonError.message}`);
       }
     }
 
-    // 3. Trigger the webhook with all job details
-    const client = clients.find(c => c.id === newJob.client_id)
-    const vehicle = vehicles.find(v => v.id === newJob.vehicle_id) || null
-    const service = services.find(s => s.id === newJob.service_id);
-    const selectedAddons = addons.filter(a => selectedAddonIds.has(a.id));
+    // 3. Trigger the webhook with all job details, regardless of addon success
+    if (newJob.scheduled_date) {
+      const client = clients.find(c => c.id === newJob.client_id)
+      const vehicle = vehicles.find(v => v.id === newJob.vehicle_id) || null
+      const service = services.find(s => s.id === newJob.service_id);
+      const selectedAddons = addons.filter(a => selectedAddonIds.has(a.id));
 
-    await triggerWebhook({
-      job: newJob,
-      client,
-      vehicle,
-      service,
-      addons: selectedAddons,
-    });
+      await triggerWebhook({
+        job: newJob,
+        client,
+        vehicle,
+        service,
+        addons: selectedAddons,
+      });
+    }
 
     router.push(`/jobs/${newJob.id}`)
   }
