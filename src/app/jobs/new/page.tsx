@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabaseClient'
 import { type Client, type Vehicle, type Service, type Addon, type Job } from '@/lib/types'
 
-interface WebhookPayload {
+interface JobDataPayload {
   job: Job;
   client?: Client;
   vehicle?: Vehicle | null;
@@ -91,19 +91,26 @@ export default function NewJobPage() {
     setSelectedAddonIds(newSelection)
   }
 
-  const triggerWebhook = async (jobData: WebhookPayload) => {
+  const addJobToGoogleSheet = async (jobData: JobDataPayload) => {
+    // This function will now throw an error on failure,
+    // which will be caught by the handleSubmit function.
     try {
-      // Call our internal API route instead of the external webhook directly
-      await fetch('/api/jobs/notify', {
+      // Call our temporary API route to add the job to Google Sheets
+      const response = await fetch(`/api/jobs/add-to-sheet`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(jobData),
       });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.details || 'Failed to add job to Google Sheet');
+      }
     } catch (error) {
-      // The API route will handle its own errors. We can log this for client-side debugging if needed.
-      console.error('Failed to trigger webhook:', error);
+      console.error('Error sending job to Google Sheet:', error);
+      // Re-throw the error to be caught by the calling function (handleSubmit)
+      throw error;
     }
   };
 
@@ -163,23 +170,33 @@ export default function NewJobPage() {
       }
     }
 
-    // 3. Trigger the webhook with all job details, regardless of addon success
+    // 3. Send job data to our Google Sheet API route
     if (newJob.scheduled_date) {
       const client = clients.find(c => c.id === newJob.client_id)
       const vehicle = vehicles.find(v => v.id === newJob.vehicle_id) || null
       const service = services.find(s => s.id === newJob.service_id);
       const selectedAddons = addons.filter(a => selectedAddonIds.has(a.id));
 
-      await triggerWebhook({
-        job: newJob,
-        client,
-        vehicle,
-        service,
-        addons: selectedAddons,
-      });
+      try {
+        // **THIS IS THE KEY CHANGE**: We now `await` this function call.
+        await addJobToGoogleSheet({
+          job: newJob,
+          client,
+          vehicle,
+          service,
+          addons: selectedAddons,
+        });
+      } catch (sheetError) {
+        // If syncing to the sheet fails, we'll set an error message
+        // but still proceed to the job page. The job was created successfully.
+        // We can use query params to show a non-blocking alert on the next page.
+        const errorMessage = sheetError instanceof Error ? sheetError.message : 'An unknown error occurred during sheet sync.';
+        router.push(`/jobs/${newJob.id}?sheetError=${encodeURIComponent(`Job created, but failed to sync to Google Sheets: ${errorMessage}`)}`);
+        return;
+      }
     }
 
-    router.push(`/jobs/${newJob.id}`)
+    router.push(`/jobs/${newJob.id}`);
   }
 
   if (loading) {
