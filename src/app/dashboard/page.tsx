@@ -13,6 +13,11 @@ interface UpcomingJob {
   scheduled_date: string;
   clients: { full_name: string } | null | { full_name: string }[]; // Allow for array or single object
 }
+interface PendingJob {
+  id: number;
+  total_price: number;
+  clients: { full_name: string } | { full_name: string }[] | null;
+}
 interface QuoteSubmission {
   id: number;
   created_at: string;
@@ -30,6 +35,8 @@ function Dashboard() {
   const router = useRouter()
   const [quotes, setQuotes] = useState<QuoteSubmission[]>([])
   const [upcomingJobs, setUpcomingJobs] = useState<UpcomingJob[]>([])
+  const [pendingJobs, setPendingJobs] = useState<PendingJob[]>([])
+  const [pendingPayout, setPendingPayout] = useState(0)
   const [stats, setStats] = useState({ newQuotes: 0, scheduledJobs: 0 })
   const [financialStats, setFinancialStats] = useState<FinancialStats>({
     runningBalance: 0,
@@ -60,26 +67,29 @@ function Dashboard() {
 
     const today = new Date().toISOString()
 
-    const [quotesRes, jobsRes, statsRes, paidJobsRes, expensesRes] = await Promise.all([
+    const [quotesRes, jobsRes, pendingJobsRes, statsRes, paidJobsRes, expensesRes] = await Promise.all([
       // Fetch recent quotes
       supabase.from('quote_submissions').select('id, created_at, full_name, status').order('created_at', { ascending: false }).limit(5),
       // Fetch upcoming jobs
       supabase.from('jobs').select('id, scheduled_date, clients(full_name)').eq('status', 'scheduled').gte('scheduled_date', today).order('scheduled_date', { ascending: true }).limit(5),
+      // Fetch completed but not paid jobs
+      supabase.from('jobs').select('id, total_price, clients(full_name)').eq('status', 'completed'),
       // Fetch stats
       supabase.from('quote_submissions').select('id', { count: 'exact', head: true }).eq('status', 'new'), // For new quotes count
       // Fetch all paid jobs for financial calculations
       supabase.from('jobs').select('total_price, scheduled_date').eq('status', 'paid'),
       // Fetch all expenses with their dates
-      supabase.from('expenses').select('amount, date')
+      supabase.from('expenses').select('amount, date'),
     ])
 
     const { data: quotesData, error: quotesError } = quotesRes
     const { data: jobsData, error: jobsError } = jobsRes
+    const { data: pendingJobsData, error: pendingJobsError } = pendingJobsRes
     const { count: newQuotesCount, error: statsError } = statsRes
     const { data: paidJobsData, error: paidJobsError } = paidJobsRes
     const { data: expensesData, error: expensesError } = expensesRes
 
-    if (quotesError || jobsError || statsError || paidJobsError || expensesError) {
+    if (quotesError || jobsError || pendingJobsError || statsError || paidJobsError || expensesError) {
       setError(
         quotesError?.message ||
         jobsError?.message ||
@@ -89,6 +99,12 @@ function Dashboard() {
         'An unknown error occurred'
       )
     } else {
+      // --- Pending Payout Calculations ---
+      const totalPendingRevenue = pendingJobsData?.reduce((acc, job) => acc + (job.total_price || 0), 0) || 0
+      const pendingBusinessShare = totalPendingRevenue * 0.60
+      setPendingPayout(pendingBusinessShare)
+      setPendingJobs(pendingJobsData || [])
+
       // --- Financial Calculations ---
       const totalRevenue = paidJobsData?.reduce((acc, job) => acc + (job.total_price || 0), 0) || 0
       const businessShare = totalRevenue * 0.60
@@ -171,24 +187,19 @@ function Dashboard() {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-8">
         <div className="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
           <h3 className="text-sm font-medium text-gray-500">Running Balance</h3>
           <p className="mt-1 text-3xl font-semibold text-gray-900">${financialStats.runningBalance.toFixed(2)}</p>
         </div>
         <div className="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
-          <h3 className="text-sm font-medium text-gray-500">Business Share (60%)</h3>
-          <p className="mt-1 text-3xl font-semibold text-green-600">${financialStats.businessShare.toFixed(2)}</p>
-        </div>
-        <div className="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
-          <h3 className="text-sm font-medium text-gray-500">Total Expenses</h3>
-          <p className="mt-1 text-3xl font-semibold text-red-600">${financialStats.totalExpenses.toFixed(2)}</p>
+          <h3 className="text-sm font-medium text-gray-500">Awaiting Sending</h3>
+          <p className="mt-1 text-3xl font-semibold text-blue-600">${pendingPayout.toFixed(2)}</p>
         </div>
         <div className="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
           <h3 className="text-sm font-medium text-gray-500">New Quotes</h3>
           <p className="mt-1 text-3xl font-semibold text-gray-900">{stats.newQuotes}</p>
         </div>
-        {/* Add more stat cards here as needed */}
       </div>
 
       {/* Main Content Grid */}
@@ -226,9 +237,9 @@ function Dashboard() {
         </div>
 
         {/* Second Row: Upcoming Jobs and Chart */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
           {/* Upcoming Jobs Column */}
-          <div className="lg:col-span-1 bg-white border border-gray-200 rounded-2xl shadow-sm">
+          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm">
             <div className="p-6 flex justify-between items-center">
               <h3 className="text-lg font-semibold text-gray-900">Upcoming Jobs</h3>
               <Link href="/jobs" className="text-sm font-medium text-primary-600 hover:text-primary-800">View All</Link>
@@ -259,8 +270,41 @@ function Dashboard() {
             </div>
           </div>
 
+          {/* Pending Payout Jobs Column */}
+          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm">
+            <div className="p-6 flex justify-between items-center">
+              <h3 className="text-lg font-semibold text-gray-900">Pending Payout Jobs</h3>
+              <Link href="/jobs?status=completed" className="text-sm font-medium text-primary-600 hover:text-primary-800">View All</Link>
+            </div>
+            <div className="border-t border-gray-200">
+              {pendingJobs.length === 0 ? (
+                <p className="text-center text-gray-500 p-6">No jobs are awaiting payment.</p>
+              ) : (
+                <ul className="divide-y divide-gray-200">
+                  {pendingJobs.map((job) => (
+                    <li key={job.id} className="p-4 hover:bg-gray-50">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-medium text-gray-900">
+                          {/* Handle both single object and array from Supabase type */}
+                          {job.clients && !Array.isArray(job.clients)
+                            ? job.clients.full_name
+                            : Array.isArray(job.clients) && job.clients.length > 0
+                              ? job.clients[0].full_name : 'Unknown Client'}
+                        </p>
+                        <p className="text-sm font-semibold text-gray-800">
+                          ${(job.total_price * 0.60).toFixed(2)}
+                        </p>
+                      </div>
+                      <p className="text-sm text-gray-500">Awaiting payment</p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
           {/* Chart */}
-          <div className="lg:col-span-2 bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Monthly Performance</h3>
             <div style={{ width: '100%', height: 300 }}>
               <ResponsiveContainer>
@@ -275,7 +319,6 @@ function Dashboard() {
                 </LineChart>
               </ResponsiveContainer>
             </div>
-          </div>
         </div>
       </div>
     </div>
