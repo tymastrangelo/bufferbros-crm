@@ -66,9 +66,9 @@ function Dashboard() {
       // Fetch upcoming jobs
       supabase.from('jobs').select('id, scheduled_date, clients(full_name)').eq('status', 'scheduled').gte('scheduled_date', today).order('scheduled_date', { ascending: true }).limit(5),
       // Fetch stats
-      supabase.from('quote_submissions').select('id', { count: 'exact', head: true }).eq('status', 'new'),
-      // Fetch all paid invoices for financial calculations (using transaction_date for time series)
-      supabase.from('invoices').select('amount, transaction_date').eq('status', 'paid'),
+      supabase.from('quote_submissions').select('id', { count: 'exact', head: true }).eq('status', 'new'), // For new quotes count
+      // Fetch all paid jobs for financial calculations
+      supabase.from('jobs').select('total_price, scheduled_date').eq('status', 'paid'),
       // Fetch all expenses with their dates
       supabase.from('expenses').select('amount, date')
     ])
@@ -90,7 +90,7 @@ function Dashboard() {
       )
     } else {
       // --- Financial Calculations ---
-      const totalRevenue = paidJobsData?.reduce((acc, invoice) => acc + (invoice.amount || 0), 0) || 0
+      const totalRevenue = paidJobsData?.reduce((acc, job) => acc + (job.total_price || 0), 0) || 0
       const businessShare = totalRevenue * 0.60
 
       const totalExpenses = expensesData?.reduce((acc, expense) => acc + (expense.amount || 0), 0) || 0
@@ -105,13 +105,13 @@ function Dashboard() {
       // --- Chart Data Processing ---
       const monthlyData: { [key: string]: { revenue: number; expenses: number } } = {}
 
-      // Process revenue from paid invoices
-      paidJobsData?.forEach(invoice => {
-        if (invoice.transaction_date) {
-          const date = new Date(invoice.transaction_date)
+      // Process revenue from paid jobs
+      paidJobsData?.forEach(job => {
+        if (job.scheduled_date) { // Using scheduled_date as the transaction date for paid jobs
+          const date = new Date(job.scheduled_date)
           const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
           if (!monthlyData[monthKey]) monthlyData[monthKey] = { revenue: 0, expenses: 0 }
-          monthlyData[monthKey].revenue += (invoice.amount || 0) * 0.60
+          monthlyData[monthKey].revenue += (job.total_price || 0) * 0.60
         }
       })
 
