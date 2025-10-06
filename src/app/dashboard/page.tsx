@@ -192,9 +192,9 @@ function Dashboard() {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+      <div className="grid grid-cols-1 gap-6 md:gap-8">
         {/* Recent Quotes Column */}
-        <div className="lg:col-span-2 bg-white border border-gray-200 rounded-2xl shadow-sm">
+        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm">
           <div className="p-6 flex justify-between items-center">
             <h3 className="text-lg font-semibold text-gray-900">Recent Quote Submissions</h3>
             <Link href="/quotes" className="text-sm font-medium text-primary-600 hover:text-primary-800">View All</Link>
@@ -225,57 +225,57 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* Upcoming Jobs Column */}
-        <div className="lg:col-span-1 bg-white border border-gray-200 rounded-2xl shadow-sm">
-          <div className="p-6 flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-gray-900">Upcoming Jobs</h3>
-            <Link href="/jobs" className="text-sm font-medium text-primary-600 hover:text-primary-800">View All</Link>
+        {/* Second Row: Upcoming Jobs and Chart */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+          {/* Upcoming Jobs Column */}
+          <div className="lg:col-span-1 bg-white border border-gray-200 rounded-2xl shadow-sm">
+            <div className="p-6 flex justify-between items-center">
+              <h3 className="text-lg font-semibold text-gray-900">Upcoming Jobs</h3>
+              <Link href="/jobs" className="text-sm font-medium text-primary-600 hover:text-primary-800">View All</Link>
+            </div>
+            <div className="border-t border-gray-200">
+              {upcomingJobs.length === 0 ? (
+                <p className="text-center text-gray-500 p-6">No upcoming jobs scheduled.</p>
+              ) : (
+                <ul className="divide-y divide-gray-200">
+                  {upcomingJobs.map((job) => (
+                    <li key={job.id} className="p-4 hover:bg-gray-50">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-medium text-gray-900">
+                          {/* Handle both single object and array from Supabase type */}
+                          {job.clients && !Array.isArray(job.clients)
+                            ? job.clients.full_name
+                            : 'Unknown Client'}
+                        </p>
+                        <Link href={`/jobs/${job.id}`} className="text-sm font-medium text-primary-600 hover:text-primary-900">
+                          Details
+                        </Link>
+                      </div>
+                      <p className="text-sm text-gray-500">{new Date(job.scheduled_date).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
-          <div className="border-t border-gray-200">
-            {upcomingJobs.length === 0 ? (
-              <p className="text-center text-gray-500 p-6">No upcoming jobs scheduled.</p>
-            ) : (
-              <ul className="divide-y divide-gray-200">
-                {upcomingJobs.map((job) => (
-                  <li key={job.id} className="p-4 hover:bg-gray-50">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium text-gray-900">
-                        {/* Handle both single object and array from Supabase type */}
-                        {job.clients && !Array.isArray(job.clients)
-                          ? job.clients.full_name
-                          : 'Unknown Client'}
-                      </p>
-                      <Link href={`/jobs/${job.id}`} className="text-sm font-medium text-primary-600 hover:text-primary-900">
-                        Details
-                      </Link>
-                    </div>
-                    <p className="text-sm text-gray-500">{new Date(job.scheduled_date).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</p>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
-      </div>
 
-      {/* Chart */}
-      <div className="mt-8 bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Monthly Performance</h3>
-        <div style={{ width: '100%', height: 300 }}>
-          <ResponsiveContainer>
-            <LineChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-              <XAxis dataKey="name" stroke="#6b7280" />
-              <YAxis stroke="#6b7280" />
-              <Tooltip
-                contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '0.5rem' }}
-                formatter={(value: number) => `$${value.toFixed(2)}`}
-              />
-              <Legend />
-              <Line type="monotone" dataKey="revenue" stroke="#16a34a" strokeWidth={2} name="Business Share" />
-              <Line type="monotone" dataKey="expenses" stroke="#dc2626" strokeWidth={2} name="Expenses" />
-            </LineChart>
-          </ResponsiveContainer>
+          {/* Chart */}
+          <div className="lg:col-span-2 bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Monthly Performance</h3>
+            <div style={{ width: '100%', height: 300 }}>
+              <ResponsiveContainer>
+                <LineChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                  <XAxis dataKey="name" stroke="#6b7280" />
+                  <YAxis stroke="#6b7280" />
+                  <Tooltip contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '0.5rem' }} formatter={(value: number) => `$${value.toFixed(2)}`} />
+                  <Legend />
+                  <Line type="monotone" dataKey="revenue" stroke="#16a34a" strokeWidth={2} name="Business Share" />
+                  <Line type="monotone" dataKey="expenses" stroke="#dc2626" strokeWidth={2} name="Expenses" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
         </div>
       </div>
     </div>
