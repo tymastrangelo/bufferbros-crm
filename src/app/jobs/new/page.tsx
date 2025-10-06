@@ -31,6 +31,7 @@ export default function NewJobPage() {
   const [selectedAddonIds, setSelectedAddonIds] = useState<Set<number>>(new Set())
   const [scheduledDate, setScheduledDate] = useState('')
   const [notes, setNotes] = useState('')
+  const [customPrice, setCustomPrice] = useState('')
 
   // UI states
   const [loading, setLoading] = useState(true)
@@ -107,12 +108,15 @@ export default function NewJobPage() {
   };
 
   const totalPrice = useMemo(() => {
-    const servicePrice = services.find(s => s.id === parseInt(selectedServiceId))?.base_price || 0
-    const addonsPrice = addons
-      .filter(a => selectedAddonIds.has(a.id))
-      .reduce((sum, a) => sum + a.price, 0)
-    return servicePrice + addonsPrice
-  }, [selectedServiceId, selectedAddonIds, services, addons])
+    let servicePrice = 0;
+    if (selectedServiceId === 'custom-service') {
+      servicePrice = parseFloat(customPrice) || 0;
+    } else {
+      servicePrice = services.find(s => s.id === parseInt(selectedServiceId))?.base_price || 0;
+    }
+    const addonsPrice = addons.filter(a => selectedAddonIds.has(a.id)).reduce((sum, a) => sum + a.price, 0);
+    return servicePrice + addonsPrice;
+  }, [selectedServiceId, customPrice, selectedAddonIds, services, addons]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -129,7 +133,7 @@ export default function NewJobPage() {
       .insert({
         client_id: parseInt(selectedClientId),
         vehicle_id: selectedVehicleId ? parseInt(selectedVehicleId) : null,
-        service_id: parseInt(selectedServiceId),
+        service_id: selectedServiceId === 'custom-service' ? null : parseInt(selectedServiceId),
         scheduled_date: scheduledDate || null,
         notes,
         total_price: totalPrice,
@@ -213,11 +217,30 @@ export default function NewJobPage() {
         {/* Service and Addons */}
         <div>
           <label htmlFor="service" className="block text-sm font-medium text-gray-700">Service <span className="text-red-500">*</span></label>
-          <select id="service" value={selectedServiceId} onChange={(e) => setSelectedServiceId(e.target.value)} required className="mt-1 block w-full rounded-lg border-gray-300 bg-white px-4 py-3 text-gray-900 shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500">
+          <select
+            id="service"
+            value={selectedServiceId}
+            onChange={(e) => {
+              setSelectedServiceId(e.target.value);
+              if (e.target.value !== 'custom-service') {
+                setCustomPrice('');
+              }
+            }}
+            required
+            className="mt-1 block w-full rounded-lg border-gray-300 bg-white px-4 py-3 text-gray-900 shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+          >
             <option value="" disabled>Select a service</option>
             {services.map(s => <option key={s.id} value={s.id}>{s.name} - ${s.base_price}</option>)}
+            <option value="custom-service">Custom...</option>
           </select>
         </div>
+
+        {selectedServiceId === 'custom-service' && (
+          <div>
+            <label htmlFor="customPrice" className="block text-sm font-medium text-gray-700">Custom Service Price ($) <span className="text-red-500">*</span></label>
+            <input type="number" id="customPrice" name="customPrice" value={customPrice} onChange={(e) => setCustomPrice(e.target.value)} required step="0.01" placeholder="Enter total service price" className="mt-1 block w-full rounded-lg border-gray-300 bg-white px-4 py-3 text-gray-900 shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500" />
+          </div>
+        )}
 
         <div>
           <label className="block text-sm font-medium text-gray-700">Add-ons</label>
