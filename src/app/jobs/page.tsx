@@ -71,8 +71,12 @@ export default function JobsPage() {
 
       setJobs(data as JobWithDetails[])
       setTotalJobs(count || 0)
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError('An unknown error occurred while fetching jobs.')
+      }
     } finally {
       setLoading(false)
     }
