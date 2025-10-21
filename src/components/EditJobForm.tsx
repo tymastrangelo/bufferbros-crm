@@ -27,7 +27,12 @@ export default function EditJobForm({ job, onSuccess, onCancel }: EditJobFormPro
   // Form input states, initialized from the job prop
   const [selectedClientId, setSelectedClientId] = useState<string>(job.client_id?.toString() || '')
   const [selectedVehicleId, setSelectedVehicleId] = useState<string>(job.vehicle_id?.toString() || '')
-  const [selectedServiceId, setSelectedServiceId] = useState<string>(job.service_id?.toString() || '')
+  const [selectedServiceId, setSelectedServiceId] = useState<string>(
+    job.service_id?.toString() || 'custom-service'
+  )
+  const [customPrice, setCustomPrice] = useState<string>(
+    job.service_id ? '' : job.total_price?.toString() || ''
+  )
   const [selectedAddonIds, setSelectedAddonIds] = useState<Set<number>>(
     new Set(job.job_addons.map(ja => ja.addons.id))
   )
@@ -84,12 +89,17 @@ export default function EditJobForm({ job, onSuccess, onCancel }: EditJobFormPro
   }
 
   const totalPrice = useMemo(() => {
-    const servicePrice = services.find(s => s.id === parseInt(selectedServiceId))?.base_price || 0
+    let servicePrice = 0
+    if (selectedServiceId === 'custom-service') {
+      servicePrice = parseFloat(customPrice) || 0
+    } else {
+      servicePrice = services.find(s => s.id === parseInt(selectedServiceId))?.base_price || 0
+    }
     const addonsPrice = addons
       .filter(a => selectedAddonIds.has(a.id))
       .reduce((sum, a) => sum + a.price, 0)
     return servicePrice + addonsPrice
-  }, [selectedServiceId, selectedAddonIds, services, addons])
+  }, [selectedServiceId, customPrice, selectedAddonIds, services, addons])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -102,7 +112,7 @@ export default function EditJobForm({ job, onSuccess, onCancel }: EditJobFormPro
       .update({
         client_id: parseInt(selectedClientId),
         vehicle_id: selectedVehicleId ? parseInt(selectedVehicleId) : null,
-        service_id: parseInt(selectedServiceId),
+        service_id: selectedServiceId === 'custom-service' ? null : parseInt(selectedServiceId),
         scheduled_date: scheduledDate || null,
         notes,
         total_price: totalPrice,
@@ -175,10 +185,41 @@ export default function EditJobForm({ job, onSuccess, onCancel }: EditJobFormPro
       {/* Service and Addons */}
       <div>
         <label htmlFor="edit-service" className="block text-sm font-medium text-gray-700">Service</label>
-        <select id="edit-service" value={selectedServiceId} onChange={(e) => setSelectedServiceId(e.target.value)} required className="mt-1 block w-full rounded-lg border-gray-300 bg-white px-4 py-3 text-gray-900 shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500">
+        <select
+          id="edit-service"
+          value={selectedServiceId}
+          onChange={(e) => {
+            setSelectedServiceId(e.target.value)
+            if (e.target.value !== 'custom-service') {
+              setCustomPrice('')
+            }
+          }}
+          required
+          className="mt-1 block w-full rounded-lg border-gray-300 bg-white px-4 py-3 text-gray-900 shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+        >
           {services.map(s => <option key={s.id} value={s.id}>{s.name} - ${s.base_price}</option>)}
+          <option value="custom-service">Custom...</option>
         </select>
       </div>
+
+      {selectedServiceId === 'custom-service' && (
+        <div>
+          <label htmlFor="edit-customPrice" className="block text-sm font-medium text-gray-700">
+            Custom Service Price ($) <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="number"
+            id="edit-customPrice"
+            name="customPrice"
+            value={customPrice}
+            onChange={(e) => setCustomPrice(e.target.value)}
+            required
+            step="0.01"
+            placeholder="Enter total service price"
+            className="mt-1 block w-full rounded-lg border-gray-300 bg-white px-4 py-3 text-gray-900 shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+          />
+        </div>
+      )}
 
       <div>
         <label className="block text-sm font-medium text-gray-700">Add-ons</label>
@@ -204,12 +245,12 @@ export default function EditJobForm({ job, onSuccess, onCancel }: EditJobFormPro
       </div>
 
       {/* Total and Submission */}
-      <div className="border-t border-gray-200 pt-4 space-y-4">
-        <div className="flex justify-between items-center text-lg">
+      <div className="border-t border-gray-200 pt-4 mt-4 bg-white">
+        <div className="flex justify-between items-center text-lg mb-3">
           <span className="font-semibold text-gray-600">Estimated Total:</span>
           <span className="font-bold text-gray-900">${totalPrice.toFixed(2)}</span>
         </div>
-        {error && <p className="text-sm text-red-500 text-center">{error}</p>}
+        {error && <p className="text-sm text-red-500 text-center mb-3">{error}</p>}
         <div className="flex justify-end space-x-4">
           <button type="button" onClick={onCancel} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">Cancel</button>
           <button type="submit" disabled={submitting} className="px-6 py-2 text-sm font-bold text-white bg-primary-700 rounded-lg hover:bg-primary-800 disabled:bg-primary-400">

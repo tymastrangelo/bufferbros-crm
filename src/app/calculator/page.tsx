@@ -40,6 +40,7 @@ interface CalculationResult {
 export default function CalculatorPage() {
   const [vehicle, setVehicle] = useState('')
   const [packagePrice, setPackagePrice] = useState('')
+  const [customPrice, setCustomPrice] = useState('')
   const [size, setSize] = useState('1.0')
   const [condition, setCondition] = useState('1.0')
   const [jobType, setJobType] = useState('full')
@@ -62,14 +63,25 @@ export default function CalculatorPage() {
 
   const calculate = () => {
     const vehicleName = vehicle || 'Unnamed Vehicle'
-    const basePrice = num(packagePrice)
+    let basePrice = 0
+    
+    // Use custom price if selected, otherwise use package price
+    if (packagePrice === 'custom') {
+      basePrice = num(customPrice)
+      if (!basePrice || basePrice <= 0) {
+        alert('Please enter a valid custom price.')
+        return
+      }
+    } else {
+      basePrice = num(packagePrice)
+      if (!basePrice) {
+        alert('Please select a package or enter a custom price.')
+        return
+      }
+    }
+    
     const sizeMul = num(size, 1)
     const condMul = num(condition, 1)
-
-    if (!basePrice) {
-      alert('Please select a package.')
-      return
-    }
 
     let freq = 'none'
     let priceMul = 1
@@ -160,9 +172,29 @@ export default function CalculatorPage() {
                 <option value="149">The Base — $149</option>
                 <option value="249">The Standard — $249</option>
                 <option value="399">The Works — $399</option>
+                <option value="custom">Custom Price</option>
               </select>
             </div>
           </div>
+
+          {/* Custom Price Input */}
+          {packagePrice === 'custom' && (
+            <div className="mb-6">
+              <label className="font-semibold text-gray-700 block mb-1">Custom Price ($)</label>
+              <input
+                type="number"
+                placeholder="Enter custom price"
+                value={customPrice}
+                onChange={(e) => setCustomPrice(e.target.value)}
+                className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                min="0"
+                step="1"
+              />
+              <p className="text-sm text-gray-600 mt-1">
+                Enter a base price for custom jobs that don&apos;t fit standard packages.
+              </p>
+            </div>
+          )}
 
           {/* Size + Condition */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
