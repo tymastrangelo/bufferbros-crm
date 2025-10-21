@@ -11,6 +11,7 @@ const links = [
   { name: 'Clients', href: '/clients' },
   { name: 'Vehicles', href: '/vehicles' },
   { name: 'Expenses', href: '/expenses' },
+  { name: 'Calculator', href: '/calculator' },
 ]
 
 export default function Sidebar() {
