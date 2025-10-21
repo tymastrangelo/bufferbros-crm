@@ -32,6 +32,7 @@ export default function NewJobPage() {
   const [scheduledDate, setScheduledDate] = useState('')
   const [notes, setNotes] = useState('')
   const [customPrice, setCustomPrice] = useState('')
+  const [employeePercent, setEmployeePercent] = useState<string>('40')
 
   // UI states
   const [loading, setLoading] = useState(true)
@@ -144,6 +145,7 @@ export default function NewJobPage() {
         scheduled_date: scheduledDate ? new Date(scheduledDate).toISOString() : null,
         notes,
         total_price: totalPrice,
+        employee_percent: parseFloat(employeePercent) || 40,
         status: 'new',
       })
       .select()
@@ -275,6 +277,25 @@ export default function NewJobPage() {
         <div>
           <label htmlFor="scheduledDate" className="block text-sm font-medium text-gray-700">Scheduled Date & Time</label>
           <input id="scheduledDate" type="datetime-local" value={scheduledDate} onChange={(e) => setScheduledDate(e.target.value)} className="mt-1 block w-full rounded-lg border-gray-300 bg-white px-4 py-3 text-gray-900 shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500" />
+        </div>
+
+        <div>
+          <label htmlFor="employeePercent" className="block text-sm font-medium text-gray-700">
+            Employee Percentage (%)
+          </label>
+          <input
+            id="employeePercent"
+            type="number"
+            value={employeePercent}
+            onChange={(e) => setEmployeePercent(e.target.value)}
+            min="0"
+            max="100"
+            step="1"
+            className="mt-1 block w-full rounded-lg border-gray-300 bg-white px-4 py-3 text-gray-900 shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+          />
+          <p className="text-sm text-gray-600 mt-1">
+            Percentage of total price paid to employee (default: 40%, company gets 60%)
+          </p>
         </div>
 
         <div>

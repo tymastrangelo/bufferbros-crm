@@ -3,9 +3,9 @@
 import { useState } from 'react'
 
 // --- SETTINGS ---
-const EMPLOYEE_SHARE = 0.60
+const EMPLOYEE_SHARE = 0.40
 const SUPPLIES_SHARE = 0.08
-const COMPANY_SHARE = 0.32
+const COMPANY_SHARE = 0.52
 const EMP_HOURLY_MIN = 50
 const BASE_TIME: Record<number, number> = { 149: 1.5, 249: 3.0, 399: 5.0 }
 
@@ -286,7 +286,7 @@ export default function CalculatorPage() {
           {/* Calculate */}
           <div className="flex items-center justify-between flex-wrap gap-3 mb-2">
             <div className="text-sm text-gray-600">
-              <span className="font-semibold">Assumptions:</span> Employee 60%, Supplies 8%, Company 32%.
+              <span className="font-semibold">Assumptions:</span> Employee 40%, Supplies 8%, Company 52%.
             </div>
             <button
               onClick={calculate}

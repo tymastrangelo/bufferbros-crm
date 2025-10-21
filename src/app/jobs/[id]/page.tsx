@@ -132,6 +132,14 @@ export default function JobDetailPage() {
   const addons = job.job_addons.map(ja => ja.addons)
   const addonsPrice = addons.reduce((sum, addon) => sum + (addon?.price ?? 0), 0)
   const calculatedTotal = servicePrice + addonsPrice
+  
+  // Calculate employee and company splits
+  // employee_percent represents EMPLOYEE share, company gets the remainder
+  const employeePercent = job.employee_percent ?? 40
+  const companyPercent = 100 - employeePercent
+  const totalPrice = job.total_price ?? calculatedTotal
+  const employeePay = (totalPrice * employeePercent) / 100
+  const companyPay = (totalPrice * companyPercent) / 100
 
   return (
     <div className="p-4 md:p-6">
@@ -180,6 +188,19 @@ export default function JobDetailPage() {
             <div className="border-t border-gray-200 mt-4 pt-4 flex justify-between text-lg font-bold text-gray-900">
               <span>Estimated Total</span>
               <span>${(job.total_price ?? calculatedTotal).toFixed(2)}</span>
+            </div>
+            
+            {/* Employee and Company Split */}
+            <div className="border-t border-gray-200 mt-4 pt-4 space-y-2">
+              <h4 className="text-sm font-semibold text-gray-700 mb-3">Payment Breakdown</h4>
+              <div className="flex justify-between text-sm text-gray-700">
+                <span>Employee ({employeePercent}%)</span>
+                <span className="font-semibold text-green-700">${employeePay.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-sm text-gray-700">
+                <span>Company ({companyPercent}%)</span>
+                <span className="font-semibold text-blue-700">${companyPay.toFixed(2)}</span>
+              </div>
             </div>
           </div>
           <div className="bg-white border border-gray-200 p-6 rounded-2xl">

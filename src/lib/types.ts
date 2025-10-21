@@ -56,6 +56,7 @@ export interface Job {
   scheduled_date?: string | null;
   total_price?: number | null;
   notes?: string | null;
+  employee_percent?: number | null;
 }
 
 export interface Expense {

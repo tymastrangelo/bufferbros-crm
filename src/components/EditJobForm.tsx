@@ -40,6 +40,9 @@ export default function EditJobForm({ job, onSuccess, onCancel }: EditJobFormPro
     job.scheduled_date ? new Date(job.scheduled_date).toISOString().slice(0, 16) : ''
   )
   const [notes, setNotes] = useState(job.notes || '')
+  const [employeePercent, setEmployeePercent] = useState<string>(
+    job.employee_percent?.toString() || '40'
+  )
 
   // UI states
   const [loading, setLoading] = useState(true)
@@ -116,6 +119,7 @@ export default function EditJobForm({ job, onSuccess, onCancel }: EditJobFormPro
         scheduled_date: scheduledDate || null,
         notes,
         total_price: totalPrice,
+        employee_percent: parseFloat(employeePercent) || 40,
       })
       .eq('id', job.id)
 
@@ -239,7 +243,24 @@ export default function EditJobForm({ job, onSuccess, onCancel }: EditJobFormPro
         <input id="edit-scheduledDate" type="datetime-local" value={scheduledDate} onChange={(e) => setScheduledDate(e.target.value)} className="mt-1 block w-full rounded-lg border-gray-300 bg-white px-4 py-3 text-gray-900 shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500" />
       </div>
 
-      <div>
+        <div>
+          <label htmlFor="edit-employeePercent" className="block text-sm font-medium text-gray-700">
+            Employee Percentage (%)
+          </label>
+          <input
+            id="edit-employeePercent"
+            type="number"
+            value={employeePercent}
+            onChange={(e) => setEmployeePercent(e.target.value)}
+            min="0"
+            max="100"
+            step="1"
+            className="mt-1 block w-full rounded-lg border-gray-300 bg-white px-4 py-3 text-gray-900 shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+          />
+          <p className="text-sm text-gray-600 mt-1">
+            Percentage of total price paid to employee (default: 40%, company gets 60%)
+          </p>
+        </div>      <div>
         <label htmlFor="edit-notes" className="block text-sm font-medium text-gray-700">Job Notes</label>
         <textarea id="edit-notes" rows={4} value={notes} onChange={(e) => setNotes(e.target.value)} className="mt-1 block w-full rounded-lg border-gray-300 bg-white px-4 py-3 text-gray-900 shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500" />
       </div>

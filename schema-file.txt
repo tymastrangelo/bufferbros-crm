@@ -68,6 +68,7 @@ CREATE TABLE public.jobs (
   scheduled_date timestamp with time zone,
   total_price numeric,
   notes text,
+  employee_percent numeric DEFAULT 60 CHECK (employee_percent >= 0::numeric AND employee_percent <= 100::numeric),
   CONSTRAINT jobs_pkey PRIMARY KEY (id),
   CONSTRAINT jobs_client_id_fkey FOREIGN KEY (client_id) REFERENCES public.clients(id),
   CONSTRAINT jobs_vehicle_id_fkey FOREIGN KEY (vehicle_id) REFERENCES public.vehicles(id),

@@ -16,6 +16,7 @@ interface UpcomingJob {
 interface PendingJob {
   id: number;
   total_price: number;
+  employee_percent?: number | null;
   clients: { full_name: string } | { full_name: string }[] | null;
 }
 interface QuoteSubmission {
@@ -74,11 +75,11 @@ function Dashboard() {
       // Fetch upcoming jobs
       supabase.from('jobs').select('id, scheduled_date, clients(full_name)').eq('status', 'scheduled').gte('scheduled_date', today).order('scheduled_date', { ascending: true }).limit(5),
       // Fetch completed but not paid jobs
-      supabase.from('jobs').select('id, total_price, clients(full_name)').eq('status', 'completed'),
+      supabase.from('jobs').select('id, total_price, employee_percent, clients(full_name)').eq('status', 'completed'),
       // Fetch stats
       supabase.from('quote_submissions').select('id', { count: 'exact', head: true }).eq('status', 'new'), // For new quotes count
       // Fetch all paid jobs for financial calculations
-      supabase.from('jobs').select('total_price, scheduled_date').eq('status', 'paid'),
+      supabase.from('jobs').select('total_price, scheduled_date, employee_percent').eq('status', 'paid'),
       // Fetch all expenses with their dates
       supabase.from('expenses').select('amount, date'),
     ])
@@ -101,14 +102,23 @@ function Dashboard() {
       )
     } else {
       // --- Pending Payout Calculations ---
-      const totalPendingRevenue = pendingJobsData?.reduce((acc, job) => acc + (job.total_price || 0), 0) || 0
-      const pendingBusinessShare = totalPendingRevenue * 0.60
+      // Calculate company share (employee_percent represents EMPLOYEE, so company gets 100 - employee_percent)
+      // BUT our default is company gets 60%, so employee_percent should default to 40
+      const pendingBusinessShare = pendingJobsData?.reduce((acc, job) => {
+        const employeePercent = job.employee_percent ?? 40
+        const companyPercent = 100 - employeePercent
+        return acc + ((job.total_price || 0) * companyPercent / 100)
+      }, 0) || 0
       setPendingPayout(pendingBusinessShare)
       setPendingJobs(pendingJobsData || [])
 
       // --- Financial Calculations ---
-      const totalRevenue = paidJobsData?.reduce((acc, job) => acc + (job.total_price || 0), 0) || 0
-      const businessShare = totalRevenue * 0.60
+      // Calculate company share (100 - employee_percent)
+      const businessShare = paidJobsData?.reduce((acc, job) => {
+        const employeePercent = (job as any).employee_percent ?? 40
+        const companyPercent = 100 - employeePercent
+        return acc + ((job.total_price || 0) * companyPercent / 100)
+      }, 0) || 0
 
       const totalExpenses = expensesData?.reduce((acc, expense) => acc + (expense.amount || 0), 0) || 0
 
@@ -128,7 +138,9 @@ function Dashboard() {
           const date = new Date(job.scheduled_date)
           const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
           if (!monthlyData[monthKey]) monthlyData[monthKey] = { revenue: 0, expenses: 0 }
-          monthlyData[monthKey].revenue += (job.total_price || 0) * 0.60
+          const employeePercent = (job as any).employee_percent ?? 40
+          const companyPercent = 100 - employeePercent
+          monthlyData[monthKey].revenue += (job.total_price || 0) * companyPercent / 100
         }
       })
 
@@ -197,12 +209,16 @@ function Dashboard() {
       {/* Stat Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-8">
         <div className="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
-          <h3 className="text-sm font-medium text-gray-500">Running Balance</h3>
+          <h3 className="text-sm font-medium text-gray-500">Running Balance (Company Share - Expenses)</h3>
           <p className="mt-1 text-3xl font-semibold text-gray-900">${financialStats.runningBalance.toFixed(2)}</p>
+          <p className="text-xs text-gray-500 mt-1">
+            Revenue: ${financialStats.businessShare.toFixed(2)} | Expenses: ${financialStats.totalExpenses.toFixed(2)}
+          </p>
         </div>
         <div className="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
-          <h3 className="text-sm font-medium text-gray-500">Awaiting Sending</h3>
+          <h3 className="text-sm font-medium text-gray-500">Awaiting Sending (Company Share)</h3>
           <p className="mt-1 text-3xl font-semibold text-blue-600">${pendingPayout.toFixed(2)}</p>
+          <p className="text-xs text-gray-500 mt-1">{pendingJobs.length} completed jobs pending</p>
         </div>
         <div className="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
           <h3 className="text-sm font-medium text-gray-500">New Quotes</h3>
@@ -300,7 +316,7 @@ function Dashboard() {
                               ? job.clients[0].full_name : 'Unknown Client'}
                         </p>
                         <p className="text-sm font-semibold text-gray-800">
-                          ${(job.total_price * 0.60).toFixed(2)}
+                          ${((job.total_price * (100 - (job.employee_percent ?? 40))) / 100).toFixed(2)}
                         </p>
                       </div>
                       <p className="text-sm text-gray-500">Awaiting payment</p>
