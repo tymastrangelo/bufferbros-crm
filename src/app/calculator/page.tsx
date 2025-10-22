@@ -5,7 +5,6 @@ import { useState } from 'react'
 // --- SETTINGS ---
 const EMPLOYEE_SHARE = 0.40
 const SUPPLIES_SHARE = 0.08
-const COMPANY_SHARE = 0.52
 const EMP_HOURLY_MIN = 50
 const BASE_TIME: Record<number, number> = { 149: 1.5, 249: 3.0, 399: 5.0 }
 

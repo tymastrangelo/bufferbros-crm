@@ -115,7 +115,7 @@ function Dashboard() {
       // --- Financial Calculations ---
       // Calculate company share (100 - employee_percent)
       const businessShare = paidJobsData?.reduce((acc, job) => {
-        const employeePercent = (job as any).employee_percent ?? 40
+        const employeePercent = (job.employee_percent as number | undefined) ?? 40
         const companyPercent = 100 - employeePercent
         return acc + ((job.total_price || 0) * companyPercent / 100)
       }, 0) || 0
@@ -138,7 +138,7 @@ function Dashboard() {
           const date = new Date(job.scheduled_date)
           const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
           if (!monthlyData[monthKey]) monthlyData[monthKey] = { revenue: 0, expenses: 0 }
-          const employeePercent = (job as any).employee_percent ?? 40
+          const employeePercent = (job.employee_percent as number | undefined) ?? 40
           const companyPercent = 100 - employeePercent
           monthlyData[monthKey].revenue += (job.total_price || 0) * companyPercent / 100
         }
